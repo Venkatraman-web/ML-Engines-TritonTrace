@@ -4093,6 +4093,2692 @@ correctly rejected non-positive window_hours: window_hours must be > 0, got -1.0
   does not depend on or assume this coincidence (T14's existing interpolation would bridge
   a finer physical grid, not this module).
 
+**T27 approved 2026-09-24** (implicit, via "proceed with T28").
+
+### T28 — Per-timestamp diagnostics module (PENDING_REVIEW)
+
+### Files added
+
+- `iste/phase3_diagnostics.py` — `TimestampDiagnostics` dataclass +
+  `compute_timestamp_diagnostics(records, t_s, *, support_lat_grid, support_lon_grid,
+  neighborhood_radius_m, support_config=None, extraction_config=None)` +
+  `compute_diagnostics_table(records, analysis_grid, ...)`. Computes, per timestamp: valid
+  particle count, lon/lat mean/variance, 2x2 covariance matrix, RMS spatial spread from
+  centroid (metres, via T15's existing `project_to_local_metres` — no new distance
+  formula), convex-hull area (`scipy.spatial.ConvexHull`, `None` for <3 particles or
+  degenerate/collinear points, never fabricated), and five T16-support-grid summaries:
+  `kde_max`, `kde_integrated_mass` (grid-cell-area-weighted sum of the clipped-nonnegative
+  support grid), `kde_entropy` (Shannon entropy, nats, of that grid normalized to sum to
+  1), `kde_effective_area_m2` (`exp(entropy) * cell_area`), and `kde_bandwidth_m` (simply
+  the `neighborhood_radius_m` already passed to T16's `compute_support_map`, echoed
+  through — not a new bandwidth concept). `n_significant_modes` reuses T17's
+  `find_candidate_peaks` directly (candidate count IS the mode count; no second peak
+  detector). This project has no separate literal Gaussian KDE — per the module's own
+  docstring, "KDE" here means exactly T16's existing `Support(x,y,t)=f(D,W,V)` field,
+  consistent with how the real-data notebook already used that term. T14/T15/T16/T17 are
+  all called unmodified; no Stage III module is imported.
+- `tests/test_phase3_diagnostics.py` — 13 `unittest` cases: a synthetic tight cluster vs. a
+  synthetic dispersed cluster (same particle count/centroid) produces the expected ordering
+  on every diagnostic (dispersed has larger spread/variance/entropy/effective-area/hull-
+  area, tighter has higher `kde_max`); empty-particle-set returns explicit NaN/None/0
+  without crashing; <3 particles and exactly-collinear particles both correctly return
+  `convex_hull_area_m2=None`; two well-separated synthetic clusters yield
+  `n_significant_modes >= 2`; `kde_bandwidth_m` echoes the configured radius exactly;
+  `compute_diagnostics_table` preserves grid length/order.
+- `notebooks/T28_phase3_diagnostics_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_diagnostics -v
+Ran 13 tests in 0.259s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 543 tests in 27.991s
+OK
+```
+
+### Manual check
+
+`notebooks/T28_phase3_diagnostics_check.ipynb` loads the real cached Stage III result (548
+particles x 6 members x 73 checkpoints), regenerates the T27 grid from its own `t_obs`,
+computes the full 73-row diagnostic table (110.5s), prints it, plots each diagnostic vs.
+hours-before-observation, and reports explicit correlation statistics. All cells executed
+via `jupyter nbconvert --execute`, zero errors. **Confirms the user-reported bias**
+quantitatively on real data:
+
+```text
+correlation(hours_before_obs, spatial_spread_km)  = +0.986  (spread grows with age)
+correlation(hours_before_obs, kde_max)             = -0.909  (KDE max falls with age)
+spread_km  at T0=0.9149, at T72=5.0139  (5.5x growth)
+kde_max    at T0=4745.00, at T72=855.31  (~82% drop)
+```
+
+This is the exact pattern the user described (tight/high-KDE near T0, dispersed/lower-KDE
+further back) — now measured, not just observed visually, on this real dataset.
+
+### Known limitations
+
+- Pure diagnostics — no normalization (T29), initial-condition correction (T30),
+  persistence (T31), convergence (T32), dispersion-aware scoring (T33), screening
+  normalization (T34), AIS (T35), composite score (T36), clustering (T37), uncertainty
+  (T38), or comparison visualization (T39) implemented yet — T28 measures the bias, it does
+  not correct it.
+- `kde_entropy`/`kde_effective_area_m2` are descriptive-statistics summaries of the T16
+  support grid, not a claim that `Support` is a validated probability density.
+- No Stage III module, and no existing T14-T17/T25/T26 module, was modified.
+
+**T28 approved 2026-09-24.**
+
+### T29 — Cross-time KDE normalization (PENDING_REVIEW)
+
+### Files added
+
+- `iste/phase3_normalization.py` — `NormalizationResult` dataclass +
+  `normalize_support_grid(support_grid, t_s, *, percentile=95.0)` +
+  `normalize_support_grids_across_time(support_grids_by_t_s, *, percentile=95.0)`. Exact
+  formula: `normalized_support(x,y,t) = Support(x,y,t) / percentile(Support_t[Support_t >
+  0], P)`, computed independently per timestamp (never pooled across timestamps), using
+  only the grid's own strictly-positive cells (excludes the large structural-zero
+  background of a fixed search grid, which empirically can make a whole-grid 95th
+  percentile exactly 0 for a tight cluster). Default `P=95`, documented rationale in the
+  module docstring: more noise-robust than the raw max (100th percentile), directly
+  interpretable, and fully overridable — not claimed as a uniquely correct statistical
+  answer, per CLAUDE.md's "never silently invent a threshold" guardrail. Returns explicit
+  `NaN` (never a fabricated value or crash) when a grid has no positive cell at all, or
+  when the computed percentile itself is `<=0`. Operates purely on an already-computed T16
+  support grid (plain `numpy` array); no particle/Stage III/candidate-detection logic, no
+  re-invocation of `compute_support_map`.
+- `tests/test_phase3_normalization.py` — 10 `unittest` cases: hand-computable percentile
+  match on a small grid, all-zero and empty-grid graceful `NaN` handling, invalid-percentile
+  rejection, per-timestamp independence (scaling one timestamp's grid by 10x does not
+  change another timestamp's own normalized result), and the core demonstration —
+  synthetic tight vs. dispersed clusters (90 particles each) with a confirmed >4x raw KDE
+  peak difference are normalized to within a factor of 3 of each other (log-ratio strictly
+  smaller than the raw log-ratio).
+- `notebooks/T29_kde_normalization_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_normalization -v
+Ran 10 tests in 0.649s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 553 tests in 26.311s
+OK
+```
+
+### Manual check
+
+`notebooks/T29_kde_normalization_check.ipynb` computes raw + normalized support grids at 8
+representative real timestamps (T0, T6, T12, T24, T36, T48, T60, T72) from the real cached
+Stage III result, prints a raw-vs-normalized table, and plots side-by-side heatmaps. All
+cells executed via `jupyter nbconvert --execute`, zero errors (15.7s). **Confirms the
+normalization substantially removes the T28-measured scale bias on real data:**
+
+```text
+hours_before_obs  raw_kde_max  reference(p95)  normalized_max
+               0      4745.00         4295.20           1.105
+               6      3961.17         3327.43           1.190
+              12      3176.76         2512.04           1.265
+              24      2001.91         1713.17           1.169
+              36      1466.93         1079.37           1.359
+              48      1189.38          832.70           1.428
+              60      1045.17          685.39           1.525
+              72       855.31          583.33           1.466
+
+raw_kde_max        range: [855.31, 4745.00]  ratio=5.55x
+normalized_kde_max  range: [1.105, 1.525]  ratio=1.38x
+```
+
+Raw KDE-max ratio across the window drops from 5.55x to 1.38x after normalization — the
+dispersion-driven scale difference T28 measured is substantially (not perfectly) removed.
+
+### Known limitations
+
+- A documented PROTOTYPE/CONFIGURATION choice, not a uniquely correct statistical answer;
+  `percentile` is fully overridable.
+- Normalization alone makes cross-time comparison meaningful — it does not itself rank
+  candidates (T30-T39 not yet implemented).
+- Manual-check notebook covers 8 sample timestamps (not all 73) to keep runtime small; the
+  underlying function works identically at any timestamp/grid.
+- No Stage III module, and no existing T14-T17/T25/T26 module, was modified.
+
+**T29 approved 2026-09-24.** User's explicit instruction: the observed `+0.923`
+correlation between `hours_before_observation` and `normalized_max` on the real dataset
+must be carried into T36's diagnostics/sensitivity analysis unmodified, not artificially
+removed at T29 (recorded in `tasks.md`'s T29 entry and `memory.md`).
+
+### T30 — Initial-condition influence field (PENDING_REVIEW)
+
+### Revision (2026-09-24): the first design was rejected before approval
+
+The original `exp(-d/spatial_scale) * exp(-age/temporal_scale)` formulation (reported
+below in the original submission) was reviewed and rejected before sign-off: since T36
+plans to subtract this influence from the composite score, a term that decays purely and
+monotonically with age (`~1.0` at T0, `~0.05` at T72) would mechanically favor older
+timestamps regardless of any actual evidence — precisely the "do not force older timestamps
+to score higher by construction" constraint this phase exists to enforce. A follow-up
+conceptual review (see the full discussion in this session's transcript) further found that
+even a corrected age-free formula anchored to the *fixed* observed-slick point would
+reintroduce an analogous bias along a spatial axis: real bulk advection (the whole particle
+population drifting up to ~48 km from the observed point by T72, confirmed on this real
+dataset) would make every old-timestamp candidate look artificially "distinct" purely
+because the current carried the whole population away — not because that candidate is
+actually a distinct spatial mode.
+
+**Corrected design: Mahalanobis distance to the particle cloud's OWN centroid at `t`.**
+The cloud at any timestamp already originated at the observed slick (Stage III's boundary
+condition), so its own mean position is the model's own physical answer to "where would an
+undifferentiated continuation of the observed slick be by now, under the real currents used
+here" — it nets out advection automatically, which a fixed reference point cannot.
+Anisotropy (real advected plumes are elongated along the flow direction, not circular) is
+handled via the full covariance matrix rather than a scalar spread, avoiding a spurious
+directional bias a single RMS number would introduce.
+
+### Files changed (rewritten)
+
+- `iste/phase3_initial_bias.py` — rewritten. `TimestampCloudStats` (mean/covariance of a
+  timestamp's own valid particles, in local projected metres via T15's
+  `project_to_local_metres`, computed once per timestamp via `compute_timestamp_cloud_stats`
+  using T14's `query_particle_slice` unmodified) + `InitialBiasInfluence` +
+  `compute_initial_bias_influence(cloud_stats, candidate_lat, candidate_lon, *, k=1.0)` +
+  `compute_initial_bias_influence_for_candidates(records, candidates, *, k=1.0, ...)` (batch
+  over T17 `Candidate` objects, grouping by shared `t_s` to avoid redundant Stage III
+  queries). Exact formula:
+  `d_M = sqrt((x_c - mu(t))^T @ Sigma(t)^-1 @ (x_c - mu(t)))`,
+  `influence = exp(-0.5*(d_M/k)^2)`. **Contains no age term anywhere** — the only place
+  time enters is through `mu(t)`/`Sigma(t)` being the actual measured state of that
+  timestamp's own particles, not an assumed clock. `k` (default `1.0`, a dimensionless
+  sigma-multiplier) is the only free parameter, replacing the previous two-constant design
+  entirely. Explicit, tested fallback for singular/near-singular covariance (eigenvalue
+  ratio `<= 1e-6`, default): isotropic variance `= trace(Sigma)/2`, still expressed in
+  "sigma units" via the same formula. Explicit `NaN` (never fabricated) for `<2` particles
+  or exactly-zero variance (all particles coincide) — flagged via an explicit
+  `covariance_state` field (`"full_rank"` / `"singular_fallback"` /
+  `"insufficient_particles"` / `"zero_variance"`), never silently treated as a valid 0.
+- `tests/test_phase3_initial_bias.py` — rewritten, 17 `unittest` cases: full-rank
+  covariance (centroid candidate → `influence≈1.0`, distant candidate → near-zero,
+  anisotropy respected — same raw-degree offset along the wider vs. narrower axis produces
+  different, correctly-ordered Mahalanobis distances, monotonicity), an explicit no-age-term
+  proof (two candidates at *different* timestamps, each placed exactly at their own
+  timestamp's centroid, receive *identical* `influence=1.0` regardless of the timestamps'
+  relative age/scale), insufficient-particle handling (0 and 1 particle → `NaN`), singular/
+  degenerate covariance (exactly 2 particles, exactly-collinear particles → isotropic
+  fallback, both finite and non-crashing; all-identical particles → `zero_variance` → `NaN`),
+  `k` validation and effect (larger `k` widens the falloff), and batch-over-candidates
+  behavior (cloud stats reused across candidates sharing a timestamp, empty list). One test
+  corrected after an initial failure for the same float64-underflow reason as before
+  (a candidate thousands of km from a very tight cloud legitimately underflows `exp()` to
+  exactly `0.0` — ordinary floating-point behavior for an input far outside this pipeline's
+  realistic operating range, not a discontinuity in the formula).
+- `notebooks/T30_initial_bias_check.ipynb` — rewritten (see manual check below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_initial_bias -v
+Ran 17 tests in 0.031s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 570 tests in 24.742s
+OK
+```
+
+### Manual check
+
+`notebooks/T30_initial_bias_check.ipynb` computes `TimestampCloudStats` at all 73 real
+analysis timestamps (T0-T72, 24.8s) and the Mahalanobis influence for all 280 real
+candidates from the T14-T17 3-day sweep (`results/actual_data/hotspots.json`). All cells
+executed via `jupyter nbconvert --execute`, zero errors:
+
+```text
+covariance_state distribution across all 73 real timestamps: {'full_rank': 73}
+computed influence for all 280 real candidates (0 NaN -- degenerate-covariance timestamps)
+
+correlation(age_hours, influence)             = -0.497
+correlation(age_hours, mahalanobis_distance)   = +0.432
+(compare to the REJECTED design, which had correlation exactly -1.000 with age by construction)
+```
+
+**This is the key validation result.** The rejected design had `correlation(age, influence)
+== -1.000` *by construction* — a deterministic, guaranteed relationship baked into the
+formula regardless of any data. The revised design has no age term at all, yet a real,
+moderate `-0.497` correlation remains on this actual dataset. That residual correlation is
+qualitatively different in kind from the rejected one: it is not guaranteed by the formula
+and could reflect genuine physics (e.g. the real cloud's dominant support mode staying
+closer, in Mahalanobis units, to its own centroid at earlier timestamps than at later ones,
+plausibly related to how the cloud's anisotropy/shape evolves as advection stretches it).
+Per the user's explicit instruction for the analogous T29 finding, **this residual
+correlation must be carried into T36's diagnostics/sensitivity analysis as-is, not
+artificially suppressed here** (recorded in `memory.md`).
+
+All 73 real timestamps had sufficient, well-conditioned particle data
+(`covariance_state='full_rank'` universally) — the singular/insufficient-particle fallback
+paths are exercised and verified only by the synthetic unit tests, not by this real run.
+
+### Known limitations
+
+- `k` is a documented PROTOTYPE/CONFIGURATION choice (default `1.0`), not a validated form
+  — fully overridable; the `exp(-0.5*(d_M/k)^2)` (Gaussian-density-consistent) shape was
+  chosen over a considered-and-rejected linear alternative (`exp(-d_M/k)`), documented in
+  the module docstring.
+- The isotropic covariance fallback (used only when the cloud is singular/near-singular,
+  never observed on the real dataset) loses directional information — an explicit, tested
+  approximation, not a claim of full accuracy.
+- Not yet combined with anything else (T36) and does not itself filter any candidate
+  (T31-T39 not yet implemented).
+- No Stage III module, and no existing T14-T17/T25/T26 module, was modified.
+
+**T30 approved 2026-09-24.** User's exact framing: "influence is strongly candidate-
+dependent at the same ages rather than being mechanically determined by age" — the
+`r=-0.497` empirical correlation is kept as a diagnostic only, never used as an age
+correction (recorded in `memory.md`).
+
+### T31 — Temporal persistence tracking (PENDING_REVIEW)
+
+### Files added
+
+- `iste/phase3_persistence.py` — `PersistenceTrack` dataclass (`candidate_ids`, `t_s_list`,
+  `support_scores`, `lat_list`/`lon_list`, plus derived properties `earliest_t_s`/
+  `latest_t_s`/`persistence_count`/`persistence_duration_hours`/`mean_support`/
+  `max_support`/`support_variance` and a `temporal_continuity(interval_hours=1.0)` method)
+  + `track_candidate_persistence(candidates, *, spatial_matching_radius_m=2000.0,
+  max_gap_hours=1.0, interval_hours=1.0)`. A simple, deterministic, documented-as-PROTOTYPE
+  greedy nearest-neighbor multi-object tracker: at each of the real 73 hourly timestamps
+  (processed in ascending real-time order), every active track is matched to its nearest
+  available candidate within `spatial_matching_radius_m` (nearest-distance-first greedy
+  assignment, each track/candidate matched at most once per timestamp); a track surviving
+  up to `max_gap_hours` of EXTRA tolerance beyond one normal `interval_hours` step (default:
+  tolerates exactly one missed intermediate hourly detection) before being closed; every
+  candidate ends up in exactly one track. **Contains no age term anywhere** — a track deep
+  in the window and an identically-shaped track near `t_obs` produce identical statistics
+  (explicitly tested). Distance uses the same `project_to_local_metres` convention (T15)
+  every other module in this project already uses. `spatial_matching_radius_m=2000.0`
+  (2 km) is grounded in T30's own measured real-data finding (~48 km/72h average advection,
+  ~0.67 km/hour, so 2 km gives ~3x margin over one hour's typical drift). Both parameters
+  explicitly labeled PROTOTYPE/CONFIGURATION, fully overridable.
+- `tests/test_phase3_persistence.py` — 15 `unittest` cases: 5 consecutive hourly candidates
+  form one high-persistence track vs. a single-timestamp spike (low persistence, `count=1`,
+  `duration=0h`) — directly matching the task's required check, with an explicit assertion
+  that persistence (not raw support magnitude — the spike candidate was given a deliberately
+  huge `support_score`) is what distinguishes them; spatial-radius gating (far-apart
+  candidates at adjacent hours don't merge, near ones do); gap tolerance (default bridges
+  exactly one missed hour; `max_gap_hours=0.0` does not bridge; a gap beyond tolerance does
+  not bridge); per-track statistics (mean/max/variance of support, hand-computed); multiple
+  T17 modes at the same timestamp never merge into one track; an explicit no-age-term proof
+  (two structurally identical tracks at very different ages produce identical persistence
+  statistics); and confirmation every input candidate is assigned to exactly one output
+  track (round-trip completeness), plus empty-input and validation-error cases.
+- `notebooks/T31_persistence_check.ipynb` — manual-check artifact (see below). One
+  presentational bug was caught and fixed during authoring: an early draft cell computed
+  "age of track's earliest member" using `latest_t_s` instead of `earliest_t_s` (a labeling
+  error in the notebook only, not in the tested library code) — corrected and re-executed
+  before finalizing.
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_persistence -v
+Ran 15 tests in 0.006s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 585 tests in 25.540s
+OK
+```
+
+### Manual check
+
+`notebooks/T31_persistence_check.ipynb` tracks all 280 real candidates from the T14-T17
+3-day sweep (`results/actual_data/hotspots.json`) across the real 73-timestamp window. All
+cells executed via `jupyter nbconvert --execute`, zero errors:
+
+```text
+280 real candidates -> 44 persistence tracks
+every candidate assigned to exactly one track: confirmed (280 == 280)
+
+track_id    count  duration_h  continuity  mean_supp   max_supp   supp_var  earliest_age_h  latest_age_h
+track0000      72        71.0       1.000    1894.78    4675.43 1124523.26            72.0           1.0
+track0002      27        26.0       1.000     417.43     545.14    3931.44            72.0          46.0
+track0008      19        18.0       1.000       3.33       5.48       1.58            72.0          54.0
+...
+
+correlation(age_of_earliest_member, persistence_count) = +0.280 -- reported as a
+diagnostic, not corrected for (no age term exists in the tracking algorithm itself)
+```
+
+The dominant real track (`track0000`) spans 72 of the 73 timestamps (T1-T72,
+`temporal_continuity=1.000`, no gaps at all) — this is the single, essentially-unimodal
+support region T14-T17 found at nearly every historical timestamp in this real run
+(consistent with the earlier finding that this particular real cloud stayed largely
+unimodal). The other 43 tracks are much shorter (secondary/transient candidates), correctly
+separated from the dominant persistent feature by the tracker. The `+0.280` age correlation
+is real but modest, and — per the standing instruction already applied to the analogous
+T29/T30 findings — is reported here as a diagnostic for T36, not treated as evidence to
+correct for or suppress.
+
+### Review validation (2026-09-24, requested before approval — no code changed)
+
+Two checks requested before T31 sign-off, both added as new cells (Sections 7-9) appended
+to `notebooks/T31_persistence_check.ipynb`; `iste/phase3_persistence.py` itself was **not**
+modified for this validation.
+
+**1. Empirical basis for `spatial_matching_radius_m` (not derived from the ~48 km/72h total
+advection figure alone, per request).** For every strictly-adjacent (1h-apart) real
+timestamp pair, computed the nearest-neighbor distance from every candidate at `t` to its
+closest candidate at `t+1h` (no radius applied) — 71 adjacent pairs, 279 displacement
+samples:
+
+```text
+median : 0.667 km        fraction below 0.5 km: 0.315
+mean   : 1.258 km        fraction below 1.0 km: 0.677
+p90    : 3.616 km        fraction below 2.0 km: 0.835
+p95    : 4.690 km        fraction below 3.0 km: 0.878
+p99    : 7.791 km
+max    : 9.656 km
+```
+
+Sensitivity analysis (unmodified tracker, `spatial_matching_radius_m` in {1, 2, 3} km):
+
+```text
+ radius_km  n_tracks  longest_h   n>=6h  n>=12h  n>=24h  n>=48h   mean_h
+       1.0        88       25.0      11       2       1       0     2.22
+       2.0        44       71.0      12       6       2       1     5.55
+       3.0        38       71.0      13       6       2       1     6.66
+```
+
+At 1 km the dominant track fragments (longest drops to 25h) because some of its own real
+steps exceed 1 km (see below). Between 2 km and 3 km the dominant track's duration is
+IDENTICAL (71h both times) — the only change is 6 additional secondary tracks merging
+(`n_tracks` 44→38), not any extension of the real dominant trajectory. This is evidence that
+2 km already fully captures the genuine trajectory's own step sizes, and that increasing to
+3 km starts merging smaller/secondary candidates rather than recovering missed genuine
+continuations — i.e. 2 km sits at a reasonable point in the sensitivity curve, though the
+~16.5% of raw nearest-neighbor pairs exceeding 2 km (largely reflecting hours where a true
+continuation doesn't exist and the "nearest" candidate is a spurious, unrelated one, not
+missed genuine matches) is noted for the record.
+
+**2. Deep-dive on `track0000` (default 2 km) — genuine trajectory vs. greedy artifact.**
+
+```text
+n consecutive-member steps: 71
+max match distance  : 1362.6 m
+mean match distance : 621.8 m
+p95 match distance  : 1063.9 m
+total displacement (path length): 44.15 km
+steps using the max_gap_hours allowance (real gap > 1h): 0
+```
+
+Every one of the 71 steps occurred at an exact 1-hour interval — the gap-bridging allowance
+was never used once. The full per-step table (all 72 members) shows smooth, small
+(333-1363 m) position changes every hour, always well under the 2 km matching radius with
+real margin. **Correction (2026-09-24, per explicit user instruction):** the table also
+shows `support_score` increasing almost monotonically across the 72 steps; this was
+initially described as additional corroborating evidence of a genuine trajectory, which the
+user correctly rejected — `support_score`'s trend is not an independent signal here (it is
+exactly what T28/T29 already showed is expected/confounded with age across this whole real
+dataset), so it must not be cited as evidence of physical genuineness. **The actual,
+sufficient validation basis for `track0000` being a coherent candidate-track (not a
+validation of physical source identity) is strictly: the consecutive hourly matching
+itself, the bounded match distances (max 1362.6 m, well under the 2 km radius), zero
+gap-bridges used, and the 1 km/2 km/3 km sensitivity analysis above** (fragmentation at
+1 km, stability from 2 km to 3 km). Plot with per-step distance annotations saved to
+`results/actual_data/T31_longest_track_annotated.png`.
+
+**Standing caveat, recorded per explicit user instruction:** persistence-track continuity
+(this task's output) is evidence of candidate-TRACK continuity — a spatially/temporally
+coherent sequence of detections — not proof of physical source identity. This distinction
+must be preserved through T36 and any later interpretation of persistence results.
+
+### Known limitations
+
+- `spatial_matching_radius_m`/`max_gap_hours` are documented PROTOTYPE/CONFIGURATION
+  choices, not validated constants — fully overridable.
+- The tracker is a simple greedy nearest-neighbor assignment, not a claim of globally
+  optimal multi-object tracking (e.g. no lookahead/backtracking if a locally-greedy choice
+  turns out suboptimal a few steps later).
+- The raw consecutive-displacement distribution (Section 7) mixes genuine-continuation
+  distances with spurious forced nearest-neighbor distances (hours where no true
+  continuation exists); it should be read as an upper-bound/context check, not a pure
+  "true match distance" distribution.
+- Persistence alone does not rank/score candidates (T32-T39 not yet implemented).
+- No Stage III module, and no existing T14-T17/T25/T26 module, was modified.
+
+**T31 approved 2026-09-24.** Standing caveat recorded (see `memory.md`): persistence-track
+continuity is evidence of candidate-track continuity, never proof of physical source
+identity; a track's own `support_score` trend must never be cited as independent
+corroborating evidence of physical genuineness (an earlier draft of this section made that
+exact mistake for `track0000` and was corrected above per explicit user instruction).
+
+### T32 — Spatial convergence scoring (PENDING_REVIEW)
+
+### Files added
+
+- `iste/phase3_convergence.py` — `ConvergenceWeights` (5 explicit, configurable,
+  equal-by-default weights) + `ConvergenceScore` dataclass +
+  `compute_convergence_score(candidate, *, total_valid_particles_at_t,
+  total_distinct_pixels_at_t, total_distinct_members_at_t, temporal_consistency=None,
+  weights=...)` + batch `compute_convergence_scores_for_candidates(records, candidates, *,
+  persistence_tracks=None, weights=...)`. Composite of 5 components, reusing existing
+  outputs wherever possible: `particle_fraction = D/total_valid_particles_at_t` (D from
+  T16's own attached `SupportFeatures`); `pixel_diversity_fraction = V/
+  total_distinct_pixels_at_t` (V is T16's own pixel-diversity feature, reused unchanged —
+  NOT recomputed); `member_diversity_fraction` (the one genuinely NEW quantity — distinct
+  `forcing_member_id` count in the candidate's already-attached
+  `NeighborhoodResult.forcing_member_id`, since T16 only computes pixel diversity, not
+  forcing-member diversity); `concentration_score = exp(-within_core_spread_m/
+  core_radius_m)` (`within_core_spread_m` = RMS of `NeighborhoodResult.distance_m`, already
+  computed by T15 — no new distance formula; `core_radius_m` is T17's own
+  `CoreRegion.radius_m`, not a new free parameter); and (optional) `temporal_consistency` =
+  the candidate's own T31 `PersistenceTrack.temporal_continuity()`, reused via a
+  `candidate_id` lookup when `persistence_tracks` is supplied — omitted and the remaining
+  weights renormalized (never fabricated) when unavailable, mirroring this project's
+  standing "fail gracefully" discipline for optional evidence. Equal weighting (`1.0` each)
+  is the default, documented as the simplest non-arbitrary PROTOTYPE/CONFIGURATION choice,
+  fully overridable. Same screening-quantity caveat as every other backward-support
+  diagnostic in this project (explicit in the module docstring): high convergence is
+  evidence of independent-trajectory agreement, never proof of physical source identity.
+- `tests/test_phase3_convergence.py` — 12 `unittest` cases: the core required check
+  (synthetic homogeneous group — all particles same single pixel/member — vs. synthetic
+  diverse group — same particle COUNT, many distinct pixels/members — at IDENTICAL raw
+  density/concentration; diverse scores strictly higher on `convergence_score`, confirming
+  it is distinguishable from raw KDE), concentration ordering (tighter neighborhood scores
+  higher) and an exact hand-computed concentration check against `core_radius_m`, optional
+  `temporal_consistency` (absent → still a defined score via renormalization; present →
+  changes the score), weight validation (negative rejected) and a zero-weight-effectively-
+  excludes-a-component check, missing-`peak_support_features`/non-positive-totals rejection,
+  and batch wiring (per-timestamp totals computed once and reused, T31 track lookup by
+  `candidate_id`, empty-list handling).
+- `notebooks/T32_convergence_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_convergence -v
+Ran 12 tests in 0.007s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 597 tests in 14.864s
+OK
+```
+
+### Manual check
+
+`notebooks/T32_convergence_check.ipynb` re-runs T14→T15→T16→T17 on the real cached Stage
+III result (regenerating `Candidate` objects WITH their attached `SupportFeatures`/
+`NeighborhoodResult`, since `hotspots.json` only stores summary fields — same T14-T17 call
+sequence already validated in the main real-data notebook, 67.1s), reuses T31's
+`track_candidate_persistence` unchanged for the temporal-consistency component, and computes
+convergence scores for all 280 real candidates. All cells executed via `jupyter nbconvert
+--execute`, zero errors:
+
+```text
+regenerated 280 real candidates (with attached support features) in 67.1s
+280 candidates -> 44 persistence tracks (T31, reused unchanged)
+computed convergence scores for 280 real candidates
+280/280 had a temporal_consistency value (all should, via T31)
+
+candidate_id                   particles  p_frac pix_div_f mem_div_f concentr temp_cons convergence
+2019-10-11T23:00:00_cand000          340   0.103     0.491     0.833    0.502     1.000       0.586
+2019-10-12T02:00:00_cand011            1   0.000     0.002     0.167    0.370     1.000       0.308
+2019-10-14T22:00:00_cand000         2123   0.646     0.761     1.000    0.534     1.000       0.788
+
+correlation(raw particle count, convergence_score) = +0.881
+```
+
+The `+0.881` correlation (strong but `< 1.0`) confirms `convergence_score` tracks raw
+density (as expected — density genuinely is real evidence) while NOT being a pure rescaling
+of it: e.g. `2019-10-12T02:00:00_cand011` has only 1 particle (near-zero raw density) yet
+still scores `convergence_score=0.308`, entirely from its concentration and (perfect)
+temporal-consistency components — exactly the kind of distinguishable-from-raw-KDE behavior
+the task requires, demonstrated on real data as well as the required synthetic unit test.
+
+### Known limitations
+
+- Equal component weighting is a documented PROTOTYPE/CONFIGURATION default, not a
+  validated scheme — fully overridable.
+- `within_core_spread_m` reuses the neighborhood already computed at T16's support-map
+  radius, which happens to equal `core_radius_m` in this real run's configuration but is not
+  guaranteed to in general.
+- A screening quantity, like every other backward-support diagnostic in this project — never
+  proof of physical source identity.
+- Not yet combined into T36's final composite score; T33-T39 not yet implemented.
+- No Stage III module, and no existing T14-T17/T25/T26/T31 module, was modified.
+
+### T32 review diagnostic: ablation / independence analysis (2026-09-24, no code changed)
+
+Requested before approval. All 17 new cells appended to
+`notebooks/T32_convergence_check.ipynb`; every ablation used the module's own existing
+`ConvergenceWeights` mechanism (setting one weight to `0.0`) — `iste/phase3_convergence.py`
+itself was not modified.
+
+**Pairwise correlations (280 real candidates).** Pearson/Spearman both computed; the
+striking finding is that `pixel_diversity_fraction` and `member_diversity_fraction` are
+themselves very strongly correlated with raw `particle_count` on this real dataset (Pearson
+0.871/0.807, **Spearman 0.999/0.910**) — on this data, wherever more particles support a
+candidate, proportionally more distinct pixels/forcing-members are represented too, so the
+"diversity" components are not empirically independent of density here, even though they
+are conceptually and computationally independent (T32 never derives one from the other).
+`convergence_score` itself correlates 0.881 (Pearson) / 0.869 (Spearman) with raw
+`particle_count`.
+
+**Leave-one-component-out ablation (via `weight_X=0.0`):**
+
+```text
+removed component               corr_vs_original  corr_vs_density  n_top10_changed
+particle_fraction                         0.9962           0.8366               12
+pixel_diversity_fraction                  0.9960           0.8780                0
+member_diversity_fraction                 0.9899           0.9113                0
+concentration_score                       0.9987           0.8856                0
+temporal_consistency                      0.9977           0.8856                0
+```
+
+Removing `particle_fraction` is the ONLY ablation that changes top-10 membership (12 of 20
+symmetric-difference entries); removing any of the other four leaves the top-10 completely
+unchanged.
+
+**Variance/std of every component, and variance-decomposition of `convergence_score`**
+(exact, since `convergence_score` is a coefficient-1/5 linear combination for all 280 real
+candidates — every one had a `temporal_consistency` value):
+
+```text
+component                   std      var_share_of_convergence_score
+particle_fraction          0.127     0.140
+pixel_diversity_fraction   0.309     0.382
+member_diversity_fraction  0.336     0.411
+concentration_score        0.053     0.045
+temporal_consistency       0.056     0.025
+```
+
+**Synthesis (answering the review's core question directly).** `particle_fraction` is NOT
+the literal dominant term by variance share (14%) — `pixel_diversity_fraction` (38%) and
+`member_diversity_fraction` (41%) together explain ~79% of `convergence_score`'s variance,
+i.e. formally the diversity terms drive the ranking more than the raw-count term does.
+**However**, because those same diversity terms are themselves almost perfectly rank-
+correlated with raw particle count on this real dataset (Spearman 0.999/0.910), the
+PRACTICAL effect is that ~93% of the score's variance traces back to terms that all move
+together with "how much particle support exists here" — not to genuinely orthogonal
+evidence. The two components designed to be structurally independent of density
+(`concentration_score`, `temporal_consistency`) contribute only ~7% combined, because both
+have very low variance across real candidates (concentration clusters near 0.45±0.05,
+temporal_consistency clusters near 0.98±0.06) — among the top-15 candidates specifically,
+`member_diversity_fraction` is pinned at exactly `1.0` and `temporal_consistency` at `1.0`
+for every one of them (a ceiling effect), leaving `particle_fraction`/
+`pixel_diversity_fraction` as the ONLY things still varying within the top tier — which is
+exactly why removing `particle_fraction` (not any other component) is the one ablation that
+reshuffles the top-10.
+
+Checked explicitly whether any top-10 real candidate reaches high convergence via particle
+count alone while scoring below the dataset median on diversity/concentration/persistence:
+**none did** — every one of the real top-10 candidates was at or above the dataset median on
+all four other components. This is reassuring for THIS dataset, but is a property of this
+dataset's own strong count/diversity correlation, not a structural guarantee from the
+scoring formula itself — the synthetic unit test (`test_multiple_independent_groups_score_
+higher_than_one_homogeneous_group`) remains the actual structural proof that the formula
+CAN distinguish density from diversity when they diverge; the real data simply doesn't
+happen to exercise that divergence much in this particular 3-day window.
+
+**Bottom line:** T32 is not literally reducible to particle density (the density term alone
+is only 14% of score variance), but on this real dataset it is close to a monotonic function
+of density because the diversity terms happen to track density so closely here, and the
+genuinely orthogonal components (concentration, temporal persistence) are currently too
+low-variance on this dataset to meaningfully assert independent influence on ranking. Default
+weights were NOT changed per explicit instruction; this diagnostic is reported for review,
+not acted upon.
+
+Artifacts: `results/actual_data/T32_correlation_matrices.png`,
+`results/actual_data/T32_ablation_top15_stacked.png`.
+
+**T32 approved 2026-09-24.** Weights/implementation unchanged. Recorded limitation carried
+forward: `convergence_score` must NOT currently be treated as an evidence source
+independent from density/concentration in T36 — on this real dataset it behaves close to
+(not identical to) a density-weighted score (see the ablation diagnostic above and
+`memory.md`).
+
+### T33 — Dispersion-aware scoring (PENDING_REVIEW — flagged finding, see below)
+
+### Files added
+
+- `iste/phase3_dispersion.py` — `DispersionAwareScore` dataclass +
+  `compute_dispersion_aware_score(candidate, cloud_stats, *, neighborhood_radius_m)` +
+  batch `compute_dispersion_aware_scores_for_candidates(records, candidates, *,
+  neighborhood_radius_m)`. Analytically-grounded formula:
+  `sigma_iso_sq(t) = trace(Sigma(t))/2` (T30's own per-timestamp covariance, reused
+  unchanged — not recomputed); `p_within_r(t) = 1 - exp(-r^2/(2*sigma_iso_sq(t)))`
+  (closed-form Rayleigh CDF — the probability mass of an isotropic 2-D Gaussian within
+  radius `r` of its own mean); `D_expected(t) = N_total_valid_at_t * p_within_r(t)`;
+  `dispersion_aware_score = D_actual_at_peak / D_expected(t)`. `r` is the SAME radius
+  already used to build the candidate's T16 support map, not a new parameter. Isotropic
+  approximation documented as an explicit simplification (mirrors T30's own singular-
+  covariance fallback convention), not a claim of exact anisotropic accuracy — T30's own
+  anisotropy test already shows real clouds are NOT isotropic. Score is unbounded above (a
+  likelihood-ratio-style quantity). Explicit, tested `NaN` for undefined dispersion states
+  (reusing T30's `covariance_state`) or zero particles — never fabricated.
+- `tests/test_phase3_dispersion.py` — 9 `unittest` cases: exact match against the
+  hand-derived analytic Rayleigh formula on a real-shaped synthetic cloud; the core required
+  check (two timestamps with very different raw density, deliberately scaled to the SAME
+  relative ratio against their own expected density, score approximately equal); an explicit
+  demonstration that the SAME raw density scores HIGHER at a more-dispersed timestamp than a
+  less-dispersed one (the literal "don't read lower raw density as automatically weaker
+  evidence" requirement); `NaN` handling for insufficient particles/zero variance/no
+  particles; radius validation; and batch wiring (cloud stats reused per shared timestamp,
+  order preserved, empty-list handling).
+- `notebooks/T33_dispersion_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_dispersion -v
+Ran 9 tests in 0.023s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 606 tests in 15.809s
+OK
+```
+
+### Manual check — real-data result requires review before this task is approved
+
+`notebooks/T33_dispersion_check.ipynb` re-runs T14→T17 across all 72 real historical
+timestamps (89.7s), takes each timestamp's top candidate, and computes both its raw density
+and its dispersion-aware score against T30's own per-timestamp cloud stats. All cells
+executed via `jupyter nbconvert --execute`, zero errors. All 72 timestamps had
+`covariance_state == "full_rank"`.
+
+```text
+correlation(hours_before_obs, raw_density)              = -0.875 (Pearson) / -0.998 (Spearman)
+correlation(hours_before_obs, dispersion_aware_score)    = +0.863 (Pearson) / +0.862 (Spearman)
+
+raw_density        range: [336.00, 2123.00]   ratio=6.32x
+dispersion_score   range: [0.8536, 2.6524]    ratio=3.11x
+crossover (score < 1.0 -> >= 1.0): between hour 34 and hour 35 (roughly mid-window)
+
+hours_before_obs  raw_density  n_total  sigma_iso_m  expected_D  dispersion_score
+               1      2123.00     3288        668.9     2212.37           0.9596
+              24       766.00     3288       1252.7      897.08           0.8539
+              48       444.00     3288       2098.5      352.92           1.2581
+              72       340.00     3288       3545.9      128.19           2.6524
+```
+
+**This is flagged, not accepted as a success.** Raw density still shows its familiar strong
+negative age correlation; the dispersion-aware score shows an almost equally strong
+correlation in age, just POSITIVE — the "undifferentiated blob" baseline (`D_expected`)
+falls faster with age (17.3x, T1->T72) than the real top candidate's own raw density does
+(6.3x), so the ratio necessarily climbs with age. This is materially different from every
+other Phase 3 task's residual-correlation finding so far (T29's `+0.923`, T30's `-0.497`,
+T31's `+0.280` — all modest, non-guaranteed residuals kept as diagnostics): here the
+magnitude (`|0.86|`) is comparable to the ORIGINAL raw-density bias (`|0.88|`) this task
+exists to remove, just with the sign flipped.
+
+**Two competing, unresolved interpretations, recorded for review rather than silently
+picked:**
+
+1. **Genuine physical signal:** real advected/sheared particle clouds do not stay
+   isotropic-Gaussian as they spread (T30 already confirmed real clouds are anisotropic);
+   a genuine coherent source region's local peak may plausibly decay much more slowly than
+   an idealized single-Gaussian-blob null predicts, so a growing dispersion-aware score
+   could correctly reflect increasingly distinctive local structure persisting within an
+   ever-more-spread-out overall envelope.
+2. **Model-mismatch artifact:** the isotropic-Gaussian `D_expected` model may simply be a
+   poor statistical null for how these real "top candidate" densities actually decay,
+   systematically inflating the ratio with age for reasons unrelated to genuine
+   concentration — i.e. T33 may have replaced one age-driven mechanical bias with another,
+   opposite one, exactly the failure mode T30's first (rejected) design fell into.
+
+This diagnostic does not resolve which interpretation is correct — it is reported honestly,
+per the standing "carry residual correlations forward as diagnostics, do not spin as
+success" instruction, but this one is flagged as requiring explicit review given its
+magnitude, rather than assumed acceptable by default.
+
+### Known limitations
+
+- Isotropic-Gaussian approximation for `D_expected` — explicit, documented, but its
+  goodness-of-fit to real (confirmed anisotropic) particle clouds has not been separately
+  validated; the flagged age-correlation finding above may be partly attributable to this.
+- `dispersion_aware_score` is unbounded above, not `[0,1]`-normalized.
+- A screening quantity, like every other backward-support diagnostic in this project — never
+  proof of physical source identity.
+- Not yet combined into T36's final composite score; T34 (screening normalization) through
+  T39 not yet implemented.
+- No Stage III module, and no existing T14-T17/T25/T26/T30 module, was modified.
+
+### T33 review diagnostic 2: isotropic vs. anisotropic expected-concentration model (2026-09-24, no code changed)
+
+Requested before approval, in response to the flagged `+0.863` age correlation above. 17
+new cells appended to `notebooks/T33_dispersion_check.ipynb`; `iste/phase3_dispersion.py`
+was **not** modified. Per explicit instruction, the formulation was NOT selected based on
+which produces a smaller age correlation — selection criterion was goodness-of-fit against
+the real, model-free empirical within-radius fraction.
+
+**1. Real particle-cloud anisotropy (72 timestamps, T30's covariance):** mean axis ratio
+`sqrt(lam1/lam2) = 1.82` (max `4.33`) — real clouds ARE meaningfully anisotropic, confirming
+T30's own earlier finding. `det(Sigma)` ("covariance area") correlates `+0.927` with age
+(matches T28's spread-growth finding); axis ratio itself correlates only mildly with age
+(`+0.375`) — clouds get somewhat, not dramatically, more elongated as they age; orientation
+is only weakly age-related (`-0.117`, presumably tracks local current direction instead).
+
+**2-4. Isotropic vs. anisotropic (Monte Carlo, 200k draws, fixed seed) vs. REAL empirical
+within-radius fraction — the actual goodness-of-fit test:**
+
+```text
+isotropic model error   (p_iso - p_empirical):   mean=+0.0052  MAE=0.0252  std=0.0277
+anisotropic model error (p_aniso - p_empirical): mean=+0.0204  MAE=0.0264  std=0.0290
+correlation(age, isotropic model error)   = -0.895
+correlation(age, anisotropic model error) = -0.819
+
+                                  Pearson   Spearman
+current ISOTROPIC score             0.863      0.862
+diagnostic ANISOTROPIC score        0.923      0.893
+```
+
+**The anisotropic model is NOT more accurate against real data — it is very slightly WORSE**
+(larger mean bias, larger MAE, larger std) than the simpler isotropic model, and its
+dispersion-aware score's age correlation is also slightly WORSE (0.923/0.893 vs. 0.863/
+0.862), not better. Both models' own prediction errors correlate strongly NEGATIVELY with
+age (`-0.895`/`-0.819`) — i.e. BOTH increasingly UNDERESTIMATE the real cloud's true
+concentration as it ages, regardless of covariance shape treatment.
+
+**5 (synthetic A/B/C).** On controlled synthetic Gaussians, the isotropic formula clearly
+DOES underestimate true within-circle mass for eccentric shapes (A: isotropic, `p_iso=0.3935`
+vs `p_aniso=0.3952`, matching as expected; B: `axis_ratio=6`, `p_iso=0.1025` vs
+`p_aniso=0.2231`, more than 2x underestimate). C (same as B, rotated 45°) reproduces B
+exactly, confirming the expected rotation-invariance of mass-within-a-circle — a correctness
+check on the MC estimator, not a real-data finding. So the isotropic simplification is a
+DEMONSTRABLE, real mathematical limitation in the abstract — it just doesn't happen to be
+what's driving the real-data age correlation (see below).
+
+**5D and 6.** Both pass cleanly: the ratio-based `dispersion_aware_score` construction
+itself is scale-invariant (`D-small`/`D-large`, very different covariance magnitude, both
+score exactly `2.0000` when actual density is fixed at 2x expected) and shape/scale-
+invariant across two very different synthetic anisotropic timestamps (raw density differs
+`4.344x`, scores both exactly `1.7000`). The RATIO construction is not the problem.
+
+**Synthesis.** The isotropic-vs-anisotropic axis is demonstrably NOT the main driver of the
+flagged `+0.86` age correlation — switching to a (more mathematically correct, for the
+Gaussian-shape question) anisotropic null model does not reduce it, and very slightly
+worsens both the goodness-of-fit and the age correlation. The more fundamental finding is
+that **neither Gaussian null model (isotropic or anisotropic) is a good statistical
+description of how these real particle clouds' peak concentration evolves** — both
+increasingly underestimate real concentration as the cloud ages, at a similar rate. This
+points toward explanation (1) from the first diagnostic (genuine persisting coherent
+structure exceeding any Gaussian-shaped null, growing relatively more pronounced with age)
+being closer to the real story than explanation (2) (isotropic-specific model mismatch) —
+though this diagnostic still does not fully resolve WHY real clouds retain more
+concentration than a Gaussian predicts; it only rules out "wrong covariance shape" as the
+explanation. **T33 remains PENDING_REVIEW; no formulation was selected or changed.**
+
+### T33 review diagnostic 3 (final): empirical within-timestamp null (2026-09-24, no code changed)
+
+Requested before approval, to determine whether the `+0.86` age correlation is caused by
+the Gaussian expected-concentration model specifically, or persists under a fully
+model-free baseline. 13 new cells appended to `notebooks/T33_dispersion_check.ipynb`;
+`iste/phase3_dispersion.py` was **not** modified; no production weights changed.
+
+**Empirical null — exact definition.** For every valid particle `i` at timestamp `t`:
+`local_count_i` = particles (self-inclusive) within radius `r` (the SAME
+`neighborhood_radius_m` already used by T16/T33 — no new parameter) of particle `i`'s own
+real position, computed by self-querying the SAME T15 `ParticleNeighborhoodIndex` KD-tree
+already built for that timestamp (reused, not rebuilt).
+`D_expected_empirical(t) = median_i(local_count_i)`;
+`empirical_null_score = D_actual_at_candidate_peak / D_expected_empirical(t)`. Zero
+distributional assumption, zero new hyperparameters, preserves the timestamp's own exact
+particle count/positions/extent/dispersion by construction (it IS the real data).
+
+**Results (72 real timestamps, 129.9s, zero NaN/degenerate cases):**
+
+```text
+                                 Pearson  Spearman     mean   median      p10      p90      min      max
+current GAUSSIAN score             0.863     0.862    1.298    1.056    0.883    2.291    0.854    2.652
+EMPIRICAL-NULL score                0.951     0.943    1.908    2.030    1.424    2.370    1.242    2.426
+
+(D_expected_gaussian - D_expected_empirical) / D_expected_empirical:
+  mean=+0.581  std=0.323
+  correlation with age: -0.510
+```
+
+**The empirical-null score's age correlation (`0.951`/`0.943`) is STRONGER than the current
+Gaussian score's (`0.863`/`0.862`), not weaker or comparable.** A fully model-free baseline,
+derived only from the real particle population with zero distributional assumption and zero
+new hyperparameters, shows an even more pronounced positive age trend. Sample rows show why:
+from hour 1 to hour 72, the top candidate's raw density falls 6.3x (2123→340), while the
+SAME population's own median local density falls ~11.2x (1709→153) — the dominant candidate
+pulls further ahead of the "typical" member of its own population as the window goes back in
+time, regardless of which null model (Gaussian or empirical) is used to measure that gap.
+
+**Conclusion — category B (per the required categorical framework):**
+
+> **"The age trend persists under an empirical null; it is not primarily a Gaussian-null
+> artifact."**
+
+This is decisive, not merely suggestive: the empirical null was specifically constructed to
+remove every trace of the Gaussian assumption (already implicated and then ruled out by
+diagnostic 2's isotropic-vs-anisotropic comparison), and the trend not only persisted but
+strengthened. Combined with diagnostic 2's finding (anisotropic Gaussian was not more
+accurate against real data, and both Gaussian nulls under-predict real concentration
+increasingly with age), this now robustly supports the "genuine structural persistence"
+interpretation from diagnostic 1 over "model-mismatch artifact": on this real dataset, the
+dominant candidate's relative prominence over the rest of its own population genuinely grows
+as the backward window extends, independent of which reasonable null-model choice is used to
+measure it. **This is strong evidence, within this dataset and this metric, that the trend
+is a real property of this dominant support region rather than an artifact of T33's specific
+formula choice** — phrased deliberately as dataset/metric-specific evidence, not as an
+absolute, universally model-independent proof (a different real spill, forcing configuration,
+or window length has not been tested). It does not by itself mean T33's score is safe to use
+unmodified as an independent T36 input; it means the `+0.86`-ish age dependence is a
+data-driven finding to be handled deliberately (e.g. explicit age-conditioning, or treated as
+a distinct diagnostic dimension rather than blended in directly), not a modeling bug to fix
+by picking a different null.
+
+**T33 — CLOSED 2026-09-24: DONE, ACCEPTED WITH MAJOR CAVEAT.** Final recorded conclusion
+(exact phrasing): "the dispersion-aware score shows a strong positive age trend on the real
+dataset, and that trend persists — and actually strengthens — under the distribution-free
+empirical within-timestamp null. Therefore the trend is not primarily attributable to the
+Gaussian null assumption or covariance anisotropy." This is strong evidence within this
+dataset/metric, not an absolute "model-independent" proof. No production code or weights
+were changed by any of the three review diagnostics
+(`iste/phase3_dispersion.py` untouched throughout).
+
+### T34 — Screening-signal normalization: DESIGN SPECIFICATION (2026-09-24, no code written)
+
+Per explicit instruction, this section is specification-only. `iste/phase3_screening.py`
+does not exist yet; no T29-T33 production module was inspected for modification, only for
+understanding what T34 must and must not duplicate.
+
+#### 1. What "the screening signal" actually is in this codebase (inspection findings)
+
+The original master spec (Stage 7) describes "a screening signal represented approximately
+as `Support = F(D,W,V) x T16`" as if it were conceptually distinct from "KDE" (Stage 2,
+→ T29). **Inspection confirms these are, in this codebase, the exact same underlying
+object:** `iste.support_features.compute_support_map`'s `Support(x,y,t) = f(D,W,V)` field —
+already established project-wide (see `memory.md`'s "KDE terminology note") as *the* thing
+this project calls "KDE" throughout Phase 3. T17's `Candidate.support_score` is that same
+field's value *exactly at the candidate's own peak grid cell* (by construction of
+`find_candidate_peaks`, which sets `support_score=sf.support` from the peak's own
+`SupportFeatures`). T29's `normalize_support_grid` already normalizes this exact field,
+per-timestamp, via `reference_value = percentile(grid[grid>0], 95)`.
+
+**This is the central design fact T34 must respect: there is only one raw signal here, and
+T29 has already built one principled, approved, per-timestamp-relative normalization of it.**
+Building a second, independently-derived normalization of the same signal would create two
+inconsistent "truths" about identical evidence — precisely the double-counting risk flagged.
+
+#### 2. What T34 IS
+
+A thin, provenance-preserving **adapter that packages T29's already-computed, already-
+approved per-timestamp normalization at the CANDIDATE level**, not a new normalization
+scheme:
+
+```text
+screening_score(candidate) = candidate.support_score / reference_value(candidate.t_s)
+```
+
+where `reference_value(t)` is exactly T29's `NormalizationResult.reference_value`
+(percentile-95-of-positive-grid-cells at that timestamp), obtained by calling T29's existing
+`iste.phase3_normalization.normalize_support_grid`/`normalize_support_grids_across_time`
+(imported and reused, never reimplemented). Because `candidate.support_score` already equals
+the support grid's own value at the candidate's peak cell (T17's construction), this formula
+is **mathematically identical** to reading T29's own `normalized_grid` off at the candidate's
+peak position — T34 adds no new transform, just candidate-level packaging plus provenance
+(raw `support_score`, the `reference_value` actually used, and the `D`/`W`/`V` breakdown
+already on `Candidate`, carried through unchanged for audit).
+
+#### 3. What T34 is explicitly NOT
+
+- **Not** a second, independently-fitted normalization of the Support field (would compete
+  with, and risk silently diverging from, T29's own).
+- **Not** forced into `[0,1]`. T29's own output naturally lands `>= ~1` for a peak value
+  (since a candidate IS the local maximum, and the reference is the 95th percentile, which
+  is `<=` the maximum almost always) — real T29 sample values ranged `~1.10-1.53`. Inventing
+  a SECOND rescale on top of T29's already-justified one, purely to force `[0,1]`, would add
+  an unjustified extra assumption without new information. `screening_score` will be
+  reported in whatever range T29's formula naturally produces, documented explicitly. Per
+  `tasks.md`'s own rewritten wording ("`[0,1]` (or another data-justified range)"), this is
+  within the task's original latitude.
+- **Not** an independent evidence source from T29's normalized KDE, for T36's purposes.
+  T36 must treat `screening_score` and "T29's normalized_support at a grid point" as **the
+  same underlying evidence**, not two things to be separately weighted and summed — this is
+  the single most important note this spec carries forward to T36's own design.
+- **Not** a place to reconcile the different ranges across T29-T34 (T30/T31 ~`[0,1]`, T32
+  ~`[0,1]`-ish, T33 unbounded above, T34 ~`>=1`-ish). That reconciliation is explicitly
+  deferred to T36, which must design a single, holistic combination strategy for
+  heterogeneously-scaled evidence — flagged here as a known open item, not solved
+  piecemeal by each individual Phase 3 task.
+- **Not** a place to add, correct for, or de-trend any age relationship. `screening_score`
+  is a function of `(support_score, reference_value)` only — no `age`/`t_obs` argument
+  anywhere in its signature. Per explicit instruction, if a real-data age correlation is
+  observed in the manual check (plausible, since it's a close derivative of T29's own
+  `+0.923`-correlated `normalized_max` finding), it will be **reported as a diagnostic,
+  exactly like every other Phase 3 residual correlation — never suppressed, never corrected,
+  never used to justify picking a different reference statistic.**
+- **Does not modify** `iste/support_features.py` (T16) or `iste/phase3_normalization.py`
+  (T29) — pure reuse via import.
+
+#### 4. Information T34 must preserve
+
+- `candidate_id`, `t_s` (standard Phase 3 identifiers, matching T30-T33's convention).
+- `raw_support_score` (unmodified `candidate.support_score`) — for audit/provenance.
+- `reference_value` actually used (for reproducibility — which exact T29 percentile was
+  applied to this candidate).
+- `density_score`/`weighted_support_score`/`pixel_diversity_score` (D/W/V), carried through
+  unchanged from `Candidate` — downstream inspection should not need to re-fetch these from
+  the original candidate object separately.
+- **Exact per-timestamp candidate ordering.** Dividing by a single positive per-timestamp
+  constant (`reference_value(t) > 0`, guaranteed whenever T29 doesn't return `NaN`) is a
+  strictly monotonic transform — two candidates at the SAME `t_s` must have
+  `screening_score` in the exact same relative order as their `raw_support_score`. This is
+  the task's own explicitly required check.
+
+#### 5. What T34 must NOT double-count (explicit cross-task accounting)
+
+- **T29 <-> T34: same signal, by design** (see above) — T36 must combine them as one
+  evidence axis, not two.
+- **T30 (initial-bias influence), T31 (persistence), T32 (convergence), T33 (dispersion-
+  aware)**: all four are structurally independent of the T16/T29/T34 Support lineage (T30
+  uses Mahalanobis distance to the cloud centroid; T31 uses cross-timestamp spatial
+  matching; T32 partially reuses T16's `V` diversity feature only, not the combined
+  `Support`; T33 compares `D` against a dispersion-derived expectation, not against T29's
+  percentile). No double-counting risk identified between T34 and T30-T33 — each measures
+  a genuinely different thing. (T32's own real-data ablation already showed its `V`/`D`-
+  derived components are empirically density-correlated on this dataset — a separate,
+  already-recorded caveat, not a T34 concern.)
+
+#### 5 continued. Tests to be written (`tests/test_phase3_screening.py`, not yet created)
+
+1. **Hand-computable formula match:** a small synthetic support grid + a known `t_s` ->
+   `screening_score` exactly equals `raw_support_score / reference_value`, cross-checked
+   against T29's own `normalize_support_grid` output for the identical grid (bit-for-bit
+   consistency between T34 and T29 — the core "not a second competing formula" guarantee).
+2. **Monotonicity within a timestamp:** two synthetic candidates at the SAME `t_s`, different
+   `support_score` -> `screening_score` preserves their exact relative order.
+3. **Cross-candidate consistency:** two candidates sharing a timestamp use the IDENTICAL
+   `reference_value` (no per-candidate recomputation drift).
+4. **No age dependence structurally:** confirm the function signature takes no `age`/`t_obs`
+   parameter; confirm two synthetic candidates with identical `(support_score,
+   reference_value)` pairs but attached to very different (fabricated) timestamps produce
+   IDENTICAL `screening_score` (mirroring T30/T33's own "no age term" proof pattern).
+5. **Graceful `NaN` propagation:** if T29's `reference_value` is `NaN` (its own documented
+   degenerate case — all-zero/empty grid), `screening_score` must also be `NaN`, never
+   fabricated or silently treated as `0`.
+6. **Batch behavior:** per-timestamp `reference_value` computed once and reused across every
+   candidate sharing that `t_s` (mirrors T30/T31/T32/T33's batch convention); candidate
+   order/count preserved; empty-list handling.
+7. **Real-data manual check (not a unit test, the required progress-report deliverable):**
+   raw `support_score` vs. `screening_score` side-by-side for the real 280-candidate set;
+   explicit confirmation that within-timestamp ordering is unchanged (a real-data version of
+   test 2); explicit, un-corrected report of `screening_score`'s correlation with age
+   (Pearson + Spearman), labeled as a diagnostic per the standing project instruction.
+
+#### 6. Open question flagged for the user, not decided here
+
+Given `screening_score` is mathematically a close derivative of T29's own `normalized_max`
+(which already showed `+0.923` age correlation on this real dataset), it is very likely
+`screening_score` will show a comparably strong age correlation in the real-data manual
+check. Per instruction, this will be reported, not corrected. Flagging in advance so it is
+not a surprise at review time.
+
+### T34 — Screening-signal normalization: IMPLEMENTATION (PENDING_REVIEW)
+
+Implemented exactly per the approved specification above — no design changes during
+implementation.
+
+### Files added
+
+- `iste/phase3_screening.py` — `ScreeningScore` dataclass +
+  `compute_screening_score(candidate, normalization_result)` + batch
+  `compute_screening_scores_for_candidates(candidates, support_grids_by_t_s, *,
+  percentile=95.0)`. `screening_score = candidate.support_score / reference_value`, where
+  `reference_value` is T29's own `NormalizationResult.reference_value` (imported/reused from
+  `iste.phase3_normalization.normalize_support_grid`, never reimplemented). Raises
+  `ValueError` if a candidate's `t_s` doesn't match the supplied `NormalizationResult`'s
+  timestamp (never silently mixes references across timestamps). `NaN` propagates from T29's
+  own degenerate case, never fabricated. No `age`/`t_obs` parameter anywhere. Batch function
+  computes each distinct timestamp's `NormalizationResult` once and reuses it (matches
+  T30-T33's convention), raising `KeyError` if `support_grids_by_t_s` is missing an entry for
+  some candidate's timestamp (explicit, not silent).
+- `tests/test_phase3_screening.py` — 12 `unittest` cases: hand-computable formula match plus
+  bit-for-bit consistency against T29's own `normalized_grid` at the peak cell (the core
+  "not a competing formula" guarantee); within-timestamp monotonic-order preservation;
+  raw-score provenance preservation; shared `reference_value` across candidates at the same
+  timestamp; a structural no-age-dependence proof (function signature has no `age`/`t_obs`
+  parameter, and two candidates with identical `(support_score, reference_value)` at very
+  different fabricated timestamps produce identical `screening_score`); `NaN` propagation
+  from T29's degenerate all-zero-grid case; a mismatched-timestamp rejection; and batch
+  behavior (reuse across shared timestamp, order preserved, missing-grid `KeyError`,
+  empty-list handling).
+- `notebooks/T34_screening_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_screening -v
+Ran 12 tests in 0.009s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 618 tests in 25.942s
+OK
+```
+
+### Manual check
+
+`notebooks/T34_screening_check.ipynb` re-runs T14→T17 on the real cached Stage III result
+(regenerating all 280 real candidates AND their support grids, 113.0s — `hotspots.json`
+alone doesn't carry the grids T29/T34 need), computes `screening_score` for every one, and
+performs the required ordering check. All cells executed via `jupyter nbconvert --execute`,
+zero errors:
+
+```text
+computed screening scores for 280 real candidates
+0 NaN (degenerate-timestamp) screening scores
+
+timestamps with >=2 candidates checked: 44
+ordering violations: 0
+confirmed: within-timestamp candidate ordering preserved exactly, for every timestamp with >=2 candidates
+
+correlation(age, raw_support_score):    Pearson=-0.725  Spearman=-0.413
+correlation(age, screening_score):      Pearson=-0.378  Spearman=+0.013
+```
+
+The required monotonicity check passes with **zero violations across all 44 real
+timestamps with 2+ candidates** — `screening_score` never reorders candidates within a
+timestamp, confirmed on real data (not just the synthetic unit test). The age-correlation
+diagnostic (reported, not corrected, per standing instruction) is notable: `screening_score`
+shows a WEAKER age correlation than raw `support_score` (Pearson `-0.378` vs. `-0.725`), and
+essentially ZERO rank correlation (Spearman `+0.013` vs. `-0.413`) — a different outcome than
+the flagging anticipated in the specification (which expected a correlation comparable to
+T29's own `+0.923` finding). The difference is explained by scope: T29's `+0.923` figure was
+computed only on each timestamp's TOP candidate; this real-data check spans all 280
+candidates (most of them small, secondary, low-support detections), so the per-timestamp
+`reference_value` normalization appears to cancel out most of the cross-timestamp scale
+trend when averaged over the full, mixed candidate population. Reported as-is, exactly as
+computed — no interpretation bias applied, no attempt to explain this away as "the fix
+worked" (consistent with the standing discipline throughout Phase 3).
+
+### Known limitations
+
+- `screening_score` is mathematically a thin derivative of T29's own per-timestamp
+  normalization, NOT independent evidence — **T36 must treat `screening_score` and T29's
+  normalized KDE as ONE evidence axis, not two.**
+- Not forced into `[0,1]`; kept in T29's own natural range, an explicit design choice (see
+  specification above).
+- The reported age correlation is dataset/scope-specific (whole real candidate population,
+  not just top candidates); it is a diagnostic finding, not validated as a general property.
+- No Stage III module, and no existing T14-T17/T25/T26/T29 module, was modified.
+
+**T34 approved 2026-09-24** after explicit provenance verification (direct source
+inspection of `iste/phase3_screening.py`): `reference_value` sourced only from T29;
+`screening_score = support_score / reference_value` exactly; no age/weighting logic; no
+second normalization. See conversation record for the full line-by-line verification.
+
+### T35 — AIS evidence hook (PENDING_REVIEW)
+
+### Files added
+
+- `iste/phase3_ais.py` — `VesselTrackSegment` (documented placeholder shape, never
+  instantiated anywhere in this codebase), `AISDataSource(ABC)` (abstract interface, one
+  `@abstractmethod` `query_vessels_near`, mirrors `iste.environment.
+  EnvironmentalFieldProvider`'s existing "fix the contract now, implement later"
+  convention — cannot be instantiated, confirmed by test), `AISEvidence` dataclass, and
+  `compute_ais_evidence(candidate, ais_source=None, *, search_radius_m=5000.0,
+  time_window_hours=3.0)`: when `ais_source is None` (the ONLY path this project can
+  exercise — no AIS data exists anywhere), returns `ais_available=False` with every
+  AIS-specific field `None` (never a fabricated `0.0`) and an explicit `reason` string; if a
+  concrete `ais_source` were ever supplied, raises `NotImplementedError` rather than
+  computing an unvalidated formula — implementing real AIS scoring logic now, with nothing
+  to check it against, would mean inventing an untested observation model (`CLAUDE.md`
+  guardrail). Also `renormalize_weighted_mean(components: list[tuple[weight, value_or_None]])
+  -> float`: a small, general, reusable utility generalizing the exact optional-component
+  renormalization pattern T32's `compute_convergence_score` already used ad hoc, packaged
+  standalone for T36 (and any future optional-evidence combination) to reuse — drops `None`
+  components, renormalizes remaining weights, returns `NaN` (never fabricated) if nothing is
+  available or total weight is zero.
+- `tests/test_phase3_ais.py` — 17 `unittest` cases: `AISDataSource` cannot be instantiated
+  bare or via an incomplete subclass; the unavailable sentinel is returned without raising,
+  with every AIS field `None` and an explanatory `reason`, for both the default and explicit
+  `ais_source=None` calls; candidate identity preserved; supplying a concrete source raises
+  `NotImplementedError`; and a thorough `renormalize_weighted_mean` suite (plain weighted
+  mean, unequal weights, one-`None`-component renormalization over the remainder — including
+  the exact "AIS present vs. absent, both well-defined" requirement using a synthetic test
+  double explicitly labeled as not real evidence — all-`None`/empty/zero-total-weight `NaN`
+  cases, and weight validation).
+- `notebooks/T35_ais_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_ais -v
+Ran 17 tests in 0.003s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 635 tests in 24.374s
+OK
+```
+
+### Manual check
+
+`notebooks/T35_ais_check.ipynb` confirms `data/` contains no AIS/vessel file, runs
+`compute_ais_evidence` over all 280 real candidates, confirms the abstract interface cannot
+be silently used, and demonstrates `renormalize_weighted_mean` with/without a synthetic AIS
+value. All cells executed via `jupyter nbconvert --execute`, zero errors:
+
+```text
+data/ contents: ['database_payload.json', 'ocean.nc', 'wind.nc']
+confirmed: no AIS/vessel data file present
+
+ran compute_ais_evidence over 280 real candidates -- zero exceptions raised
+ais_available=True:  0
+ais_available=False: 280
+ais_score is None:   280 (must equal total candidate count -- never a fabricated 0.0)
+
+correctly cannot instantiate the bare abstract interface: Can't instantiate abstract class
+  AISDataSource without an implementation for abstract method 'query_vessels_near'
+correctly raises NotImplementedError if a source were ever supplied
+
+composite score with AIS ABSENT (renormalized over 5 available components): 0.6100
+composite score with AIS PRESENT (synthetic test double, 6 components):      0.5667
+both well-defined (no NaN, no crash) -- confirms the renormalization mechanics T36 will rely on.
+```
+
+### Known limitations
+
+- No AIS data exists in this project; the AIS-present code path is intentionally
+  unimplemented (`NotImplementedError`), not a placeholder formula.
+- `renormalize_weighted_mean` is a general utility, not AIS-specific — its "present" case
+  demonstration used a synthetic placeholder value, explicitly not real evidence.
+- No Stage III module, and no existing T14-T17/T25/T26/T29-T34 module, was modified.
+
+### T36 — Composite multi-feature source score: DESIGN SPECIFICATION (2026-09-24, no code written)
+
+Per explicit instruction, specification-only. No `iste/phase3_composite.py`, no tests, no
+notebook, no T37 work. `iste/phase3_ais.py`/`phase3_convergence.py`/`phase3_dispersion.py`/
+`phase3_initial_bias.py`/`phase3_normalization.py`/`phase3_persistence.py`/
+`phase3_screening.py` (T29-T35) were inspected (source + real-data behavior) but NOT
+modified. A read-only inspection script computed real-data statistics (`t36_inspection.py`,
+scratchpad only, not checked in) by calling T29-T35's existing public functions on the real
+280-candidate dataset; this is data-gathering for the design, not a T36 implementation.
+
+#### 1. Existing component inventory (from source inspection, not just task descriptions)
+
+| Component | Module | Candidate-level output field | Natural range (definition) |
+|---|---|---|---|
+| Support (raw) | T16/T17 | `Candidate.support_score` | Unbounded, raw units |
+| T29 normalized KDE | `phase3_normalization.py` | `NormalizationResult.reference_value` (per-timestamp scalar) | Reference scale for `support_score` |
+| T30 initial-condition influence | `phase3_initial_bias.py` | `InitialBiasInfluence.influence` | `(0, 1]`, Mahalanobis-based |
+| T31 persistence | `phase3_persistence.py` | `PersistenceTrack.persistence_count` (int, hours) / `.temporal_continuity()` | count: `[1, 73]`; continuity: `(0, 1]` |
+| T32 convergence | `phase3_convergence.py` | `ConvergenceScore.convergence_score` | Equal-weighted mean of ~`[0,1]` sub-terms |
+| T33 dispersion-aware | `phase3_dispersion.py` | `DispersionAwareScore.dispersion_aware_score` | `[0, inf)`, likelihood-ratio-style |
+| T34 screening | `phase3_screening.py` | `ScreeningScore.screening_score` | `= support_score / T29_reference_value` |
+| T35 AIS | `phase3_ais.py` | `AISEvidence.ais_score` | Always `None` in this project (no data) |
+
+**Confirmed by source inspection: T34 introduces no new computation.**
+`iste/phase3_screening.py` line 94: `screening_score = float(candidate.support_score) /
+reference_value`, where `reference_value` (line 90) is read directly from the
+`NormalizationResult` T29's own `normalize_support_grid` returns (imported at line 48, never
+reimplemented). There is no `np.percentile` call, no independent statistic, anywhere in
+`phase3_screening.py` (confirmed by grep during T34's own review). **T29 and T34 are the
+same evidence lineage — see section 6.**
+
+#### 2. Real-data distribution summary (280 real candidates, full source-lineage recomputation)
+
+```text
+                        count      mean       std     min     10%     25%      50%       75%        90%        95%        max
+raw_support             280.0  541.1449  973.5004  2.5485  2.7022  2.8368   5.8352  864.1301  1735.7832  2802.3910  4675.4308
+density                 280.0  216.9429  418.1796  1.0000  1.0000  1.0000   2.0000  339.2500   656.3000  1159.5500  2123.0000
+screening_score         280.0    0.4262    0.5884  0.0020  0.0033  0.0040   0.0075    1.1713     1.4223     1.4832     1.5438
+initial_bias_influence  280.0    0.2810    0.4067  0.0000  0.0001  0.0005   0.0036    0.8038     0.9807     0.9910     0.9997
+persistence_count       280.0   27.2429   27.3283  1.0000  2.0000  7.0000  14.0000   72.0000    72.0000    72.0000    72.0000
+persistence_continuity  280.0    0.9761    0.0562  0.6667  0.9167  1.0000   1.0000    1.0000     1.0000     1.0000     1.0000
+convergence_score       280.0    0.4220    0.1604  0.2435  0.2952  0.3117   0.3255    0.5618     0.6970     0.7482     0.7899
+dispersion_score        280.0    0.4284    0.6472  0.0014  0.0024  0.0047   0.0076    0.8818     1.2630     1.9625     2.6524
+```
+
+`ais_available = True` for **0 / 280** candidates. `initial_bias_influence`'s
+`covariance_state` is `"full_rank"` for all 280 (no degenerate-covariance candidates on this
+real dataset — see the NaN-handling caveat in section 4).
+
+**Key observation:** `raw_support`, `density`, `screening_score`, `initial_bias_influence`,
+and `dispersion_score` are all heavily right-skewed/bimodal (median far below mean, e.g.
+`screening_score` median `0.0075` vs. mean `0.4262`) — most of the 280 candidates are minor,
+secondary detections at their own timestamp, with a smaller set of dominant candidates
+carrying most of the mass. `persistence_continuity` and `convergence_score` are much less
+skewed (median close to mean).
+
+#### 3. Pairwise correlation / association analysis (candidate-level, real data)
+
+**Pearson:**
+
+```text
+                        raw_support  density  screening_score  initial_bias_influence  persistence_count  persistence_continuity  convergence_score  dispersion_score
+raw_support                   1.000    0.996            0.762                   0.839              0.810                   0.235              0.915             0.575
+screening_score               0.762    0.717            1.000                   0.979              0.933                   0.305              0.934             0.927
+initial_bias_influence        0.839    0.796            0.979                   1.000              0.949                   0.291              0.973             0.852
+persistence_count             0.810    0.770            0.933                   0.949              1.000                   0.312              0.929             0.798
+persistence_continuity        0.235    0.220            0.305                   0.291              0.312                   1.000              0.353             0.278
+convergence_score             0.915    0.881            0.934                   0.973              0.929                   0.353              1.000             0.775
+dispersion_score               0.575    0.536            0.927                   0.852              0.798                   0.278              0.775             1.000
+```
+
+**Spearman:**
+
+```text
+                        raw_support  density  screening_score  initial_bias_influence  persistence_count  persistence_continuity  convergence_score  dispersion_score
+raw_support                   1.000    0.945            0.839                   0.819              0.602                   0.229              0.795             0.777
+screening_score               0.839    0.909            1.000                   0.773              0.655                   0.268              0.767             0.976
+initial_bias_influence        0.819    0.849            0.773                   1.000              0.669                   0.367              0.791             0.764
+persistence_count             0.602    0.703            0.655                   0.669              1.000                   0.326              0.753             0.665
+persistence_continuity        0.229    0.314            0.268                   0.367              0.326                   1.000              0.538             0.305
+convergence_score             0.795    0.869            0.767                   0.791              0.753                   0.538              1.000             0.764
+dispersion_score               0.777    0.871            0.976                   0.764              0.665                   0.305              0.764             1.000
+```
+
+`screening_score` vs. `raw_support`: Pearson `0.7623`, Spearman `0.8392` (the T29/T34
+equivalence is a *formula* identity, not a correlation — the imperfect correlation here is
+expected, since `screening_score` divides by a *per-timestamp* reference, so it is not a
+monotonic transform of `raw_support` *across* timestamps, only *within* one).
+
+**Age correlations (candidate-level, all 280, not just top-candidate-per-timestamp):**
+
+```text
+  raw_support               Pearson=-0.725  Spearman=-0.413
+  density                   Pearson=-0.728  Spearman=-0.344
+  screening_score           Pearson=-0.378  Spearman=+0.013
+  initial_bias_influence    Pearson=-0.497  Spearman=-0.316
+  persistence_count         Pearson=-0.489  Spearman=-0.289
+  persistence_continuity    Pearson=-0.076  Spearman=-0.091
+  convergence_score         Pearson=-0.593  Spearman=-0.342
+  dispersion_score          Pearson=-0.132  Spearman=+0.110
+```
+
+**Important scope note on `dispersion_score`'s age behavior:** T33's own closed diagnostic
+(approved 2026-09-24) established a strong age correlation (`Pearson +0.863`/`Spearman
++0.862`, strengthening to `+0.951`/`+0.943` under the empirical null) — but that analysis
+was computed on the **top candidate per timestamp only** (72 points). Across the **full
+280-candidate population** T36 will actually score, the age correlation of
+`dispersion_score` is much weaker (`Pearson -0.132`/`Spearman +0.110`). Both findings are
+correct and are reported here together — they describe different populations (the dominant
+trajectory alone vs. every detected candidate). This is not a reversal of T33's closed
+finding; it is additional, population-scoped information relevant specifically to T36's use
+case. `screening_score` shows the identical pattern (T29's top-candidate `+0.923` vs. this
+population-level `-0.378`/`+0.013`), already noted in T34's own approved write-up.
+
+#### 4. Double-counting assessment
+
+**This is the central, and largest, finding of this design phase — larger than the
+already-known T29/T34 identity.** Every candidate-level evidence component EXCEPT
+`persistence_continuity` shows strong pairwise association with every other component on
+this real dataset (Pearson typically `0.72-0.98`, Spearman typically `0.60-0.98`). Using the
+required careful language: this is a **strong empirical association** on this specific
+280-candidate, single-spill, real dataset — it does not prove formal statistical dependence,
+and a different spill/window/forcing configuration might show a different structure.
+
+The physical/structural reason this association exists: T17 retains **multiple local modes
+per timestamp**, but in this real run one dominant mode plus several minor secondary
+detections is the typical pattern (confirmed by the skewed distributions in section 2).
+Nearly every candidate-level metric responds, directly or indirectly, to "how large/dominant
+is this candidate's supporting particle population" — so on a population shaped like this
+one (few dominant candidates, many minor ones), metrics that are *conceptually* independent
+(density, Mahalanobis-closeness-to-centroid, cross-forcing-member/pixel diversity,
+dispersion-relative concentration, track length) end up *empirically* highly correlated,
+because they are all responding to the same underlying dominant-vs-minor split.
+
+**`persistence_continuity` is the one clear exception** (`0.22-0.37` with everything else) —
+it answers a genuinely different question ("how unbroken is this candidate's own track,"
+independent of how big the candidate is) and is also the most age-neutral component
+(`Pearson -0.076`/`Spearman -0.091`). **`persistence_count`**, by contrast, IS part of the
+correlated cluster (`0.60-0.95`) — it is more a proxy for "size/dominance" than for
+"continuity" specifically (a long-lived track is usually also a big one, on this dataset).
+
+**Design consequence:** summing several of these strongly-associated components with
+independent, comparably large weights would not combine five independent lines of evidence
+— it would count the *same* underlying "dominance" signal five times under five different
+names, which is precisely the double-counting failure mode this task must avoid. This drives
+the weighting philosophy in sections 7-11 below: the highly-associated components
+(`convergence_score`, `dispersion_score`, and — separately, see section 7 — `initial_bias_
+influence`) receive deliberately modest weights specifically *because of* this empirical
+structure, not because their definitions are considered unimportant.
+
+#### 5. Proposed normalization for each component
+
+| Component | Proposed treatment | Preserves | Changes | Why appropriate | New temporal bias? |
+|---|---|---|---|---|---|
+| `screening_score` (T29/T34) | Used as-is, no further rescale | Per-timestamp relative ordering (T29's own design) | Nothing new | Real range (`0.002-1.54`) is already roughly comparable in order of magnitude to the other active components (see section 8) — unlike raw `support_score` (`2.5-4675`), which is exactly why T29/T34 exist | No — inherits T29's already-reported, already-accepted residual (see T29's approval) |
+| `persistence_continuity` | Used as-is | Its own `(0,1]` bound | Nothing | Already bounded, already low variance is an honest data property, not something to "fix" | No — near-zero age correlation empirically |
+| `convergence_score` | Used as-is | Its own approx-`[0,1]` range (already an equal-weighted mean of bounded sub-terms, T32's own design) | Nothing | Already bounded and interpretable | Inherits T32's own reported age correlation (not independently re-derived here) |
+| `dispersion_score` | Used as-is | Its own `[0, inf)` range | Nothing | Real range (`0.001-2.65`) comparable order of magnitude to the others; forcing it into `[0,1]` via e.g. a sigmoid would be an unjustified nonlinear transform this task explicitly warns against | No new bias added; T33's own established age finding (both scopes) carried forward as-is |
+| `initial_bias_influence` | **Not weighted in the default composite — diagnostic field only** | Full precision, reported per candidate | N/A (not in the sum) | See section 7 — sign is not scientifically justified given the data | N/A |
+| `persistence_count` | **Not weighted in the default composite — diagnostic field only** | Full precision, reported per candidate | N/A | Empirically redundant with the "dominance" cluster; `persistence_continuity` carries T31's actual composite contribution | N/A |
+| `ais_score` | Used as-is when available (never today) | N/A | N/A | Always dropped + renormalized (section 9) | N/A |
+
+**No min-max rescaling anywhere.** Min-max would (a) compress the real, meaningful skew in
+`screening_score`/`dispersion_score` into an arbitrary `[0,1]` window whose edges are set by
+this ONE dataset's extreme values (not a stable, reusable scale across future runs), and (b)
+was explicitly warned against. The four active components' real ranges (`0.002-1.54`,
+`0.667-1.0`, `0.244-0.79`, `0.001-2.65`) are close enough in order of magnitude that no
+rescaling is applied; this is stated as a data-justified decision, re-checked against
+whatever real distribution a future run produces, not assumed universally true.
+
+#### 6. Proposed treatment of T29/T34 (required)
+
+**`support_evidence(candidate) := screening_score(candidate)`** (T34's own field, which is
+*defined as* `support_score / T29_reference_value`). T29's `normalized_support` grid and
+T34's `screening_score` are **one evidence axis**, entering the composite exactly once, via
+a single weight `w_support`. T34 is retained purely as the candidate-level provenance-
+carrying adapter it was designed to be (raw `support_score`, the `reference_value` used, and
+D/W/V carried through) — it does not introduce a second term. `iste.phase3_normalization`'s
+grid-level output is not separately re-entered into the composite anywhere.
+
+#### 7. Proposed treatment of T30 (required — full reasoning, not inherited from the original spec)
+
+**What `initial_bias_influence` actually represents** (per T30's own approved module
+docstring and design record): the Mahalanobis distance from a candidate to *its own
+timestamp's whole particle population's centroid*, exponentiated. High `influence` means the
+candidate is statistically indistinguishable from an ordinary, undifferentiated member of
+the bulk population at that instant — **not** "unlikely source," per T30's own explicit,
+already-recorded caveat.
+
+**Why simply subtracting it (the original spec's convention) is not justified by this
+data:** `initial_bias_influence` correlates `0.839` (Pearson) with `raw_support` and `0.973`
+with `convergence_score` — among the STRONGEST pairwise associations in the whole matrix.
+This is structurally expected: the dominant candidate at a timestamp usually *is* close to
+the population's own centroid (it typically contains the bulk of the mass), so "close to
+centroid" and "large/dominant/well-supported" are nearly the same fact on this dataset.
+Subtracting `initial_bias_influence` with any material weight would therefore **penalize
+almost exactly the candidates every other evidence component favors**, for a reason
+(closeness to centroid) that is a near-mechanical consequence of being the dominant
+candidate, not independent evidence of implausibility. That would make top-rank candidates
+unstable (large positive terms nearly cancelled by a large negative term driven by the same
+underlying factor) and would not have a data-supported justification.
+
+**Why simply adding it is equally unjustified:** would just reinforce the same "dominance"
+signal already carried by `support_evidence`/`convergence_score`, worsening the
+double-counting problem in section 4 rather than adding independent information.
+
+**Proposed resolution: `initial_bias_influence` remains a reported DIAGNOSTIC field on every
+candidate (default weight `w_initial = 0.0`), not part of the summed composite.** This is
+directly authorized by the task's own framing ("If it should remain diagnostic rather than
+directly scored, explain that alternative"). The weight is configurable and can be set
+non-zero (either sign) for exploratory sensitivity analysis outside the three required
+configurations, but no default sign is asserted, because neither is defensible from the
+current data or from T30's own established interpretation.
+
+#### 8. Proposed treatment of T33 (required)
+
+`dispersion_score` enters the composite as an ordinary **positively-signed** evidence term
+(`w_dispersion > 0`; higher = more concentrated than generic dispersion predicts, per T33's
+own established, approved interpretation) with **no age-correction term of any kind** —
+confirmed absent by construction (the formula only reads `(support_score, reference_value)`-
+analogous inputs, never `age`/`t_obs`; same discipline as T30/T33's own approved modules).
+Both of the following facts are carried forward together, not selectively:
+
+- T33's own closed diagnostic: top-candidate-only age correlation is strong
+  (`Pearson +0.863` to `+0.951` depending on null model).
+- This design phase's finding: population-level (all 280 candidates) age correlation is
+  much weaker (`Pearson -0.132`/`Spearman +0.110`).
+
+Neither fact is used to justify adding a corrective term. The weight (`w_dispersion`) is
+kept moderate, not because of the age relationship, but because of `dispersion_score`'s own
+strong empirical association with `screening_score` (`0.927`) and `initial_bias_influence`
+(`0.852`) noted in section 4 — the same double-counting reasoning applied to every
+"dominance-cluster" component.
+
+#### 9. Proposed AIS-missing behavior (required)
+
+AIS unavailability is represented as `ais_score = None` (T35's own existing sentinel,
+unmodified) and is combined via T35's own existing, already-tested
+`renormalize_weighted_mean(components: list[tuple[weight, value_or_None]])` utility, reused
+directly (no new renormalization logic written for T36):
+
+```text
+active = [(w_i, v_i) for (w_i, v_i) in components if v_i is not None]
+source_score = sum(w_i * v_i for w_i, v_i in active) / sum(w_i for w_i, v_i in active)
+```
+
+When `ais_score is None` (every candidate in this project today), the `(w_ais, None)` pair
+is dropped from `active` entirely — its configured weight contributes to neither the
+numerator nor the denominator, so the remaining active weights are automatically
+renormalized to sum to their own total (mathematically equivalent to re-scaling them
+proportionally so they sum to 1 among themselves). **AIS absence never contributes 0 to the
+score and never lowers it relative to an AIS-available candidate scored identically on every
+other component** — this is the direct, already-verified (T35's own test suite) behavior of
+the reused utility. If real AIS data is integrated later, the SAME formula and SAME default
+weight `w_ais` (proposed 0.20, see section 11) apply without any T36 code change — only
+`ais_source` becoming non-`None` and returning real evidence instead of raising
+`NotImplementedError`.
+
+#### 10. Exact composite mathematical formula
+
+```text
+support_evidence(c)        = screening_score(c)                          [T29/T34, one axis]
+persistence_evidence(c)    = temporal_continuity(track(c))                [T31]
+convergence_evidence(c)    = convergence_score(c)                         [T32]
+dispersion_evidence(c)     = dispersion_aware_score(c)                    [T33]
+ais_evidence(c)             = ais_score(c)  if ais_available(c) else None  [T35]
+initial_bias_evidence(c)    = initial_bias_influence(c)   -- DIAGNOSTIC ONLY, weight 0 by default
+persistence_count_evidence(c) = persistence_count(c)      -- DIAGNOSTIC ONLY, weight 0 by default
+
+components(c) = [
+    (w_support,             support_evidence(c)),
+    (w_persistence,         persistence_evidence(c)),
+    (w_convergence,         convergence_evidence(c)),
+    (w_dispersion,          dispersion_evidence(c)),
+    (w_ais,                 ais_evidence(c)),                # None unless real AIS data exists
+    (w_initial,             initial_bias_evidence(c)),        # default weight 0.0
+    (w_persistence_count,   persistence_count_evidence(c)),   # default weight 0.0
+]
+
+source_score(c) = renormalize_weighted_mean(components(c))   # T35's own utility, reused unchanged
+```
+
+**Score range:** no fixed upper bound (inherits `dispersion_evidence`'s and
+`support_evidence`'s unboundedness); no fixed probabilistic interpretation.
+**`source_score` is an evidence-ranking score, not a probability, confidence, likelihood, or
+certainty of source identity** — stated explicitly per the task's own requirement. It is
+valid for ranking candidates *within one run/configuration*, not as an absolute scale
+comparable across different spills, windows, or weight configurations.
+
+T25's separate forward-accuracy filtering/ranking is untouched and not folded into this
+score, per the task's own framing.
+
+#### 11. Default weight configuration (real-data-informed, not outcome-tuned)
+
+```text
+w_support             = 0.35
+w_persistence          = 0.20
+w_convergence           = 0.10
+w_dispersion            = 0.15
+w_ais                    = 0.20   (contributes 0 today; always renormalized away, AIS absent in this project)
+w_initial (T30)          = 0.00   (diagnostic only -- see section 7)
+w_persistence_count      = 0.00   (diagnostic only -- redundant with the dominance cluster)
+                          -----
+                    sum = 1.00
+```
+
+**These weights are heuristic and configurable — not claimed as scientifically validated.**
+
+#### 12. Rationale for every default weight (one line each)
+
+- `w_support = 0.35`: the largest single weight because `support_evidence` is the most
+  directly interpretable, longest-established signal (T16→T17→T29→T34 lineage) and the one
+  every other Phase 3 component was built to refine or cross-check, not because it "worked
+  best" on any outcome.
+- `w_persistence = 0.20`: the second-largest weight specifically *because*
+  `persistence_continuity` is the one component with weak empirical association with
+  everything else (section 4) and near-zero age correlation — genuinely additive
+  information, not a restatement of dominance.
+- `w_convergence = 0.10`: kept small because of its very strong empirical association with
+  `support_evidence` (`0.934`) and `initial_bias_influence` (`0.973`) on this dataset — real,
+  distinct-by-construction evidence (independent-trajectory diversity), but downweighted to
+  avoid reinforcing the same latent "dominance" signal already carried by `w_support`.
+- `w_dispersion = 0.15`: moderate weight; real, distinct-by-construction correction for
+  cross-timestamp dispersion, but also strongly support-associated (`0.927`) on this
+  dataset, and carries the known age-behavior caveat from section 8 (population-level weak,
+  top-candidate-level strong) — kept below `w_support`/`w_persistence` pending further
+  investigation, not zeroed, since it does represent a genuinely different DEFINITION
+  (concentration relative to expected dispersion) even where empirically correlated here.
+- `w_ais = 0.20`: a substantial *reserved* weight reflecting AIS's intended importance as
+  genuinely independent, non-derived evidence once real data exists — deliberately not a
+  token/negligible weight, specifically so AIS will not be effectively irrelevant on the day
+  it becomes available; contributes exactly 0 to any score computed in this project today.
+- `w_initial (T30) = 0.00`: no default sign is scientifically justified (section 7) — kept
+  as a reported diagnostic, not scored, until a specific, data-supported interpretation is
+  established.
+- `w_persistence_count = 0.00`: empirically redundant with the dominance cluster (section
+  4); `persistence_continuity` already carries T31's intended composite contribution.
+
+#### 13. Three sensitivity-analysis configurations (proposed, not yet run)
+
+Weights chosen from the evidence-role/scale reasoning above, not from inspecting which
+candidates would enter/leave any top-10 — no such check was performed before proposing
+these.
+
+```text
+                          DEFAULT   PERSISTENCE-EMPHASIS   DISPERSION-EMPHASIS
+w_support                  0.35            0.25                   0.25
+w_persistence               0.20            0.40                   0.15
+w_convergence                0.10            0.10                   0.10
+w_dispersion                 0.15            0.10                   0.35
+w_ais                         0.20            0.15                   0.15
+w_initial (T30)                0.00            0.00                   0.00
+w_persistence_count            0.00            0.00                   0.00
+                              ----            ----                   ----
+sum                          1.00            1.00                   1.00
+```
+
+- **PERSISTENCE/TRAJECTORY-EMPHASIS**: doubles `w_persistence` (0.20->0.40) at the expense
+  of `w_support`/`w_dispersion`, to test how much the ranking shifts toward long,
+  well-tracked candidates over raw-magnitude-dominant ones.
+- **DISPERSION/PHYSICAL-CONSISTENCY-EMPHASIS**: more than doubles `w_dispersion`
+  (0.15->0.35) at the expense of `w_support`/`w_persistence`, to test how much the ranking
+  shifts toward candidates whose concentration most exceeds generic dispersion expectations.
+
+At implementation time, each configuration's real-data top-10, rank changes, score changes,
+overlap with the DEFAULT top-10, and inter-configuration rank correlation (Spearman) would
+be computed and reported — not done in this specification-only phase.
+
+#### 14. Synthetic test plan (`tests/test_phase3_composite.py`, not yet created)
+
+1. **Monotonicity** — for each of `support_evidence`/`persistence_evidence`/
+   `convergence_evidence`/`dispersion_evidence`, increasing that component alone (holding
+   all others fixed) strictly increases `source_score`, given a positive weight.
+2. **Weight normalization** — for a candidate with all components available, active weights
+   sum to the configured total; `source_score` equals the plain weighted mean.
+3. **Missing AIS** — `ais_score=None` produces a well-defined, non-`NaN` `source_score`
+   using only the other active components; equals `renormalize_weighted_mean` computed by
+   hand over the non-AIS terms.
+4. **T29/T34 non-duplication** — a structural test confirming the composite's component
+   list contains exactly ONE term derived from the Support/T29/T34 lineage (e.g., by
+   constructing two synthetic candidates that differ only in `support_score` and confirming
+   the resulting `source_score` difference matches a single `w_support`-weighted
+   contribution, not a doubled one).
+5. **Raw-KDE domination (synthetic)** — a synthetic candidate with very high `support_
+   evidence` but deliberately weak `persistence_evidence`/`convergence_evidence`/
+   `dispersion_evidence` must NOT automatically outrank a candidate with more balanced
+   evidence across all components at comparable `support_evidence` — demonstrating the
+   composite is not simply `support_evidence` relabeled.
+6. **Persistence evidence** — holding all else equal, a candidate with strictly higher
+   `persistence_continuity` ranks strictly higher (given `w_persistence > 0`).
+7. **T33 age behavior (structural)** — confirm, via `inspect.signature`, that the composite
+   function accepts no `age`/`t_obs` parameter anywhere in its call chain (mirrors the
+   T30/T34 structural no-age-term proofs already established).
+8. **T30 sign (structural)** — confirm the DEFAULT configuration's `w_initial == 0.0`
+   exactly, and confirm `initial_bias_influence` is still reported on every result object
+   (diagnostic, not silently dropped).
+
+#### 15. Raw-KDE domination test plan (real data, not yet run)
+
+At implementation time: compute `source_score` (DEFAULT config) for all 280 real candidates;
+compare its ranking against the existing raw `support_score` (T17) ranking via Spearman rank
+correlation, top-10 overlap (set intersection size), which candidates enter/leave the
+top-10, and per-candidate rank-change magnitude. Given the real correlation structure
+already found in section 3 (`support_evidence` alone already correlates `0.762-0.934` with
+several other active components), some residual correlation between the new composite and
+raw Support is EXPECTED and would not by itself indicate failure — the test's purpose is to
+confirm the composite is not IDENTICAL to raw-Support ranking, and to show concretely which
+candidates the added components (persistence/convergence/dispersion) actually move.
+
+#### 16. Known limitations
+
+- The double-counting analysis (section 4) is based on ONE real spill/window/forcing
+  configuration (280 candidates, 3-day/1-hour window, `ow-0008`, 6-member subset) — the
+  correlation structure driving the proposed weights is dataset-specific, described with
+  "strong empirical association" language throughout, never claimed as a general/formal
+  independence result.
+- **Implementation gap discovered during this design phase, not yet fixed (no code
+  written):** `renormalize_weighted_mean` (T35) currently filters only `value is None`, not
+  `NaN`. `initial_bias_influence`/`dispersion_aware_score` CAN return `NaN` for degenerate-
+  covariance timestamps (T30/T33's own documented behavior) — on the current real dataset
+  this never triggers (all 280 candidates have `covariance_state="full_rank"`), but T36's
+  implementation must explicitly treat `NaN` the same as `None` when building
+  `components(c)`, or a single degenerate candidate would silently `NaN`-poison its entire
+  `source_score`. Flagged here for the implementation task, not fixed now.
+- `w_ais`'s real effect is entirely untested (no AIS data exists) — its value is a
+  documented placeholder, not empirically informed.
+- No claim that this weighting scheme is optimal, calibrated, or validated against any
+  ground truth (none exists for this project).
+
+#### 17. Scientific caveats (explicitly restated, per instruction)
+
+1. Weights are heuristic/configurable, not trained or externally validated.
+2. `source_score` is not a calibrated probability — an evidence-ranking score only.
+3. Correlated evidence streams (section 4) can cause effective double-counting even when
+   implemented as separate, individually well-defined features — addressed here by
+   deliberate weight allocation, not by removing any component's definition.
+4. T33's population-level weak age correlation does not overturn or "fix" its own
+   top-candidate-level strong finding (section 3) — both are true, of different scopes.
+5. AIS absence is missing information, never evidence against a candidate (section 9).
+6. T34 is not independent of T29 — one evidence axis, entered once (section 6).
+7. The existing Stage III physical backtracking model (T00-T13.5) is completely unchanged
+   by this design; T36 operates purely on already-computed T14-T35 outputs.
+8. A high `source_score` is evidence-based ranking, not proof of actual physical source
+   identity, exactly like every other Phase 2/3 screening quantity in this project.
+
+#### 18. Files that would be changed during implementation (not created now)
+
+- `iste/phase3_composite.py` (new) — `CompositeWeights`, `SourceScore` dataclass,
+  `compute_source_score`/`compute_source_scores_for_candidates`, reusing T29-T35's public
+  functions and T35's `renormalize_weighted_mean` directly.
+- `tests/test_phase3_composite.py` (new) — the 8-item synthetic plan in section 14.
+- `notebooks/T36_composite_check.ipynb` (new) — real-data sensitivity table (section 13) and
+  raw-KDE domination comparison (section 15).
+- `tasks.md`/`progress.md`/`memory.md` updates, as with every prior Phase 3 task.
+- **No existing file (`iste/phase3_normalization.py`, `phase3_initial_bias.py`,
+  `phase3_persistence.py`, `phase3_convergence.py`, `phase3_dispersion.py`,
+  `phase3_screening.py`, `phase3_ais.py`, or any T00-T26 module) would be modified.**
+
+#### 19. Explicit statement
+
+**No production code has been modified during this design phase.** `t36_inspection.py`
+(scratchpad-only, not part of the repository) called existing T29-T35 public functions
+read-only to gather the real-data numbers in sections 2-3; it wrote no output into `iste/`,
+`tests/`, or `notebooks/`. T29 through T35 remain exactly as approved. T37 has not been
+started.
+
+### T36 DESIGN AMENDMENTS (2026-09-24, no code written) — supersedes parts of sections 9, 7, 8, 5 above
+
+Four amendments requested before any implementation; still specification-only. Nothing in
+`iste/` or `tests/` changed. Sections 1-4, 6, 10-19 of the original spec above are
+unaffected; sections 5, 7, 8, 9 are amended/extended as follows.
+
+#### Amendment 1 — explicit AIS active-weight renormalization formula (replaces section 9's prose description)
+
+```text
+AVAILABLE(c) = { i : evidence_i(c) is not None }         # T35's own filter, reused unchanged
+
+w_eff_i(c) = w_i / sum_{j in AVAILABLE(c)} w_j             for i in AVAILABLE(c)
+             0                                              for i not in AVAILABLE(c)
+
+source_score(c) = sum_{i in AVAILABLE(c)} w_eff_i(c) * evidence_i(c)
+                 = sum_{i in AVAILABLE(c)} w_i * evidence_i(c)  /  sum_{j in AVAILABLE(c)} w_j
+```
+
+This is exactly T35's already-tested `renormalize_weighted_mean`, restated with the
+requested `w_eff` notation — no new mechanism. `AVAILABLE(c)` is determined by whether each
+component's VALUE is `None`, never by its configured weight — a component with
+`w_i = 0.0` (e.g. `initial_bias_influence`, `persistence_count`) is still `AVAILABLE`
+whenever its value is defined (always, for full-rank timestamps); it simply contributes `0`
+to both numerator and denominator either way, so its presence/absence in `AVAILABLE` has no
+numerical effect. Only AIS is actually ever excluded from `AVAILABLE` in this project today.
+
+**Worked example, DEFAULT configuration, AIS unavailable (every candidate in this project
+today) — configured weights vs. effective weights, reported side by side:**
+
+```text
+component               w_i (configured)   in AVAILABLE?   w_eff_i (renormalized)
+support_evidence              0.35               yes              0.35/0.80 = 0.4375
+persistence_evidence           0.20               yes              0.20/0.80 = 0.2500
+convergence_evidence            0.10               yes              0.10/0.80 = 0.1250
+dispersion_evidence              0.15               yes              0.15/0.80 = 0.1875
+initial_bias_evidence (T30)       0.00               yes              0.00/0.80 = 0.0000
+persistence_count_evidence         0.00               yes              0.00/0.80 = 0.0000
+ais_evidence                        0.20               NO (None)         --  (excluded, not 0)
+                                    ----                                  ----
+                              sum(configured, all 7) = 1.00      sum(w_eff over AVAILABLE) = 1.0000
+```
+
+`sum_{j in AVAILABLE} w_j = 0.35+0.20+0.10+0.15+0.00+0.00 = 0.80` (AIS's `0.20` excluded from
+the denominator entirely, not treated as `0` evidence). The implementation's output object
+for every candidate will report BOTH the configured weight vector (fixed, from
+`CompositeWeights`) AND the effective (`w_eff`) vector actually used for that candidate, so a
+reader can always see whether/how renormalization occurred — required so AIS absence is
+visibly "excluded" rather than silently "zeroed," satisfying "AIS must never be treated as
+negative evidence" directly in the reported data structure, not just in prose.
+
+#### Amendment 2 — T30 rationale, primary vs. supporting reasons (replaces section 7's "why subtraction/addition" framing)
+
+**Revised primary reason (scientific, not statistical):** `initial_bias_influence` measures
+Mahalanobis-distance consistency between a candidate and its own timestamp's whole particle
+ensemble — a purely geometric/statistical-consistency quantity. **It has no scientifically
+justified DIRECTIONAL interpretation as source evidence.** T30's own design record already
+establishes that high influence means "consistent with being an ordinary member of the
+bulk," and explicitly refuses to equate that with either "more likely" or "less likely" to
+be a genuine source — the module was deliberately built to answer a geometric consistency
+question, not a source-likelihood question. Assigning it either `+w_initial` or `-w_initial`
+would require importing a directional claim (e.g. "geometric outliers are more/less
+plausible sources") that T30 was never designed or validated to support. **This absence of a
+justified sign — not the correlation structure — is the primary reason
+`w_initial = 0.0` by default.**
+
+**Supporting (secondary) reason, kept from the original analysis:** the strong empirical
+correlation with `support_evidence` (`0.839`) and `convergence_evidence` (`0.973`) means
+that even if a directional interpretation existed, including it at material weight would
+additionally risk double-counting the dominance cluster (section 4) — this is offered as
+*additional* justification for why, even under a hypothetical future directional
+interpretation, a large weight would still be inappropriate without first addressing the
+correlation structure. It is not, on its own, the reason the sign is left unassigned.
+
+`initial_bias_influence` continues to be computed and reported on every candidate
+(diagnostic field, full precision) — never silently dropped — so a future task that
+*does* establish a scientifically justified directional interpretation can assign
+`w_initial != 0` without recomputing anything.
+
+#### Amendment 3 — T33 explicit ranking-vs-probability statement (extends section 8)
+
+Added verbatim to the specification: **`dispersion_evidence`'s contribution to
+`source_score` is evidence-ranking information, not a calibrated probability, and not an
+age-neutral likelihood.** Three distinct claims, stated separately so none is
+accidentally implied by omission:
+
+- Not a calibrated probability: `dispersion_aware_score` is a likelihood-ratio-*style*
+  quantity (unbounded above, `~1` = matches generic-dispersion expectation) but was never
+  fit or validated against any ground-truth source-location dataset — no calibration
+  exists, per T33's own approval record.
+- Not age-neutral: both of section 3's findings (strong top-candidate-level age
+  correlation; weak population-level age correlation) are real properties of this
+  component that persist into the composite unmodified — `w_dispersion > 0` does not
+  imply or require age-neutrality, and none is claimed.
+- Evidence-ranking only: like every other component, its role is to shift relative
+  ordering among candidates given the configured weight, not to assert an absolute,
+  cross-run-comparable score.
+
+#### Amendment 4 — exact normalization function for every active component (replaces section 5's summary table for these four; section 5's `initial_bias`/`persistence_count`/`ais` rows are unchanged)
+
+**`support_evidence(c)`**
+
+```text
+formula:        support_evidence(c) = support_score(c) / reference_value(t_s(c))
+                 reference_value(t) = percentile_95({Support(x,y,t) : Support(x,y,t) > 0})
+                 [T29's own formula, iste.phase3_normalization.normalize_support_grid, reused unchanged]
+input range:     support_score(c) in [0, infinity)  (raw T16 Support units)
+output range:    empirically [0.002, 1.544] on real data; theoretically (0, infinity)
+monotonicity:    strictly increasing in support_score(c) for FIXED t_s (reference_value(t_s)
+                 is a positive constant per timestamp -- T34's own tested property).
+                 NOT monotonic in support_score ACROSS different timestamps by design (a
+                 modest candidate at a "quiet" timestamp can outscore a larger candidate at
+                 a "busy" one) -- this is the entire mechanism T29 uses to remove the
+                 cross-timestamp KDE-magnitude bias T28 measured.
+fit scope:       PER-TIMESTAMP (reference_value recomputed independently from each
+                 timestamp's own grid; never fit globally across timestamps).
+temporal bias:   mitigated by design, not eliminated -- T29's own approved residual
+                 (+0.923 top-candidate) and this design phase's population-level finding
+                 (-0.378 Pearson / +0.013 Spearman) both stand, reported not corrected.
+rationale:       reuses T29/T34's already-approved formula unchanged; T36 adds no transform.
+```
+
+**`persistence_evidence(c)`**
+
+```text
+formula:         persistence_evidence(c) = temporal_continuity(track(c))
+                 = persistence_count(track(c)) / (round(persistence_duration_hours(track(c))
+                   / interval_hours) + 1),  interval_hours = 1.0 (T27's locked resolution)
+                 [T31's own formula, iste.phase3_persistence.PersistenceTrack.temporal_continuity, reused unchanged]
+input range:     persistence_count in {1, ..., 73} (integer hourly slots);
+                 persistence_duration_hours in [0, 72]
+output range:    (0, 1] exactly, by construction
+monotonicity:    for FIXED persistence_duration_hours, strictly increasing in
+                 persistence_count; for FIXED persistence_count, strictly decreasing in
+                 persistence_duration_hours. Not a function of a single scalar input alone
+                 -- both quantities are emergent properties of T31's own tracking algorithm,
+                 not directly chosen per candidate.
+fit scope:       PER-TRACK (a third category, distinct from "global" or "per-timestamp" --
+                 the ratio is intrinsic to the one T31 track a candidate belongs to,
+                 self-referential to that track's own span, not fit against any other
+                 candidate or timestamp).
+temporal bias:   empirically the WEAKEST of any component on real data (Pearson -0.076,
+                 Spearman -0.091, section 3) -- no age term anywhere in T31's tracking or
+                 continuity formula (confirmed by source inspection during T31's approval).
+rationale:       reuses T31's already-approved formula unchanged; T36 adds no transform.
+```
+
+**`convergence_evidence(c)`**
+
+```text
+formula:         convergence_evidence(c) = convergence_score(c)
+                 = [ w_pf*particle_fraction + w_pd*pixel_diversity_fraction
+                     + w_md*member_diversity_fraction + w_cc*concentration_score
+                     + w_tc*temporal_consistency ] / [sum of active sub-weights],
+                   all sub-weights = 1.0 by T32's own default ConvergenceWeights
+                 [T32's own formula, iste.phase3_convergence.compute_convergence_score, reused unchanged]
+input range:     each sub-term in approximately [0,1]: particle_fraction/pixel_diversity_
+                 fraction/member_diversity_fraction are true fractions in [0,1];
+                 concentration_score = exp(-x) in (0,1]; temporal_consistency (T31's
+                 continuity) in (0,1] when available.
+output range:    approximately [0,1] (weighted mean of [0,1]-ish terms); empirically
+                 [0.2435, 0.7899] on real data.
+monotonicity:    strictly increasing in EACH sub-component individually, holding the others
+                 fixed (guaranteed by construction of a positive-weight mean -- T32's own
+                 tested property); therefore also strictly increasing in convergence_score
+                 as used here, trivially (identity pass-through).
+fit scope:       MIXED, inherited unchanged from T32: particle_fraction/pixel_diversity_
+                 fraction/member_diversity_fraction are normalized PER-TIMESTAMP (divided by
+                 that timestamp's own totals); concentration_score is PER-CANDIDATE (uses
+                 the candidate's own core_radius_m); temporal_consistency is PER-TRACK (T31).
+temporal bias:   this design phase's new candidate-level finding: Pearson -0.593 / Spearman
+                 -0.342 (section 3) -- reported here for the first time at this granularity;
+                 carried forward as a diagnostic, no correction applied.
+rationale:       reuses T32's already-approved formula and default sub-weights unchanged;
+                 T36 adds no transform.
+```
+
+**`dispersion_evidence(c)`**
+
+```text
+formula:         dispersion_evidence(c) = D_actual(c) / D_expected(t_s(c))
+                 D_expected(t) = N_valid(t) * (1 - exp(-r^2 / (2*sigma_iso_sq(t))))
+                 sigma_iso_sq(t) = trace(Sigma(t)) / 2   [T30's own covariance, reused]
+                 [T33's own formula, iste.phase3_dispersion.compute_dispersion_aware_score, reused unchanged]
+input range:     D_actual(c) in [0, infinity) (T16 density count at the candidate's peak);
+                 D_expected(t) in (0, N_valid(t)] (bounded above -- a probability times a count)
+output range:    [0, infinity), unbounded above (a likelihood-ratio-style "surprise"
+                 quantity, per T33's own approved docstring); empirically [0.0014, 2.6524]
+                 on real data.
+monotonicity:    strictly increasing in D_actual(c) holding t_s fixed; strictly DECREASING
+                 in D_expected(t) holding D_actual fixed -- equivalently, increasing in the
+                 timestamp's own dispersion (sigma_iso_sq) for fixed D_actual/N/r. This
+                 directional behavior is exactly T33's designed purpose (a fixed raw density
+                 at a MORE dispersed timestamp scores HIGHER, per T33's own tested
+                 "same raw density scores higher when more dispersed" property).
+fit scope:       PER-TIMESTAMP (Sigma(t) and N_valid(t) both computed fresh per timestamp
+                 from that timestamp's own particle population via T30's
+                 compute_timestamp_cloud_stats, reused; no global fitting across timestamps).
+temporal bias:   both section 3 findings carried forward together (strong top-candidate-
+                 level Pearson +0.863 to +0.951; weak population-level Pearson -0.132 /
+                 Spearman +0.110) -- reported, not corrected; no age/t_obs parameter exists
+                 anywhere in the formula (confirmed by source inspection at T33's approval).
+rationale:       reuses T33's already-approved (with major caveat, see Amendment 3) formula
+                 unchanged; T36 adds no transform.
+```
+
+**No component in this amendment introduces a new mathematical transform.** Every formula
+above is a direct citation of an already-approved T29-T33 function; T36's only new
+contribution is the WEIGHTED COMBINATION (Amendment 1's `w_eff`/`source_score` formula), not
+any per-component rescaling.
+
+Weight values are unchanged from the original specification (section 11): still proposed,
+still not implemented, still not claimed as validated.
+
+**No production code has been modified by this amendment.** T29-T35 unchanged. T37 not
+started.
+
+### T36 — Composite multi-feature source score: IMPLEMENTATION (PENDING_REVIEW)
+
+Implemented exactly per the approved DESIGN SPECIFICATION + DESIGN AMENDMENTS above — no
+design changes during implementation, beyond the already-flagged, already-approved-for-
+fixing `NaN`-vs-`None` handling gap (fixed inside `phase3_composite.py` only, `iste/
+phase3_ais.py` itself untouched).
+
+#### Files added
+
+- `iste/phase3_composite.py` — `CompositeWeights` (7 fields, `w_initial`/
+  `w_persistence_count` default `0.0`, all validated `>= 0`, matching every other Phase 3
+  `*Weights` dataclass's convention), `DEFAULT_WEIGHTS`/`PERSISTENCE_EMPHASIS_WEIGHTS`/
+  `DISPERSION_EMPHASIS_WEIGHTS` module constants, `SourceScore` dataclass (reports both
+  `configured_weights` and `effective_weights` per candidate, per Amendment 1),
+  `compute_source_score` (single candidate, takes each T29/T30/T31/T32/T33/T35 result
+  object explicitly — validates every `candidate_id` matches, raises `ValueError`
+  otherwise) and `compute_source_scores_for_candidates` (batch, wires up T34/T31/T32/T33/T35
+  via each module's own unmodified batch function, plus T30 via a per-timestamp-reused
+  `compute_timestamp_cloud_stats` loop matching T30's own established pattern). The
+  `NaN`-vs-`None` gap flagged in the design spec's "Known limitations" is fixed here (a
+  private `_nan_to_none` helper converts `NaN` evidence to `None` before passing into T35's
+  `renormalize_weighted_mean`, since `0.0 * float('nan') == nan` in IEEE arithmetic would
+  otherwise poison the whole sum even at zero weight) — `iste/phase3_ais.py` itself was not
+  modified; the fix lives entirely in the new module.
+- `tests/test_phase3_composite.py` — 34 `unittest` cases covering the full approved test
+  plan: monotonicity (all 4 active components), active-weight normalization (hand-computed
+  match + effective-weights-sum-to-1), missing-AIS behavior (well-defined score, `w_eff_
+  ais=0`, AIS absence never lowers a score relative to an identical AIS-absent candidate),
+  T29/T34 non-duplication (structural — exactly one `support`-named weight field — and
+  numerical — a `support_score` delta enters the composite exactly once), raw-KDE-domination
+  synthetic case, persistence-evidence ordering, no-age-correction (structural signature
+  check + identical-evidence-different-timestamp behavioral proof), T30 zero-weight/sign
+  handling (default zero, no effect on score, still reported, nonzero weight DOES take
+  effect, negative weight rejected by validation), all 3 sensitivity configurations (sum to
+  1, intended weight shifted in the intended direction, T30/persistence_count still zero),
+  `NaN`-safety (the fixed gap, both zero-weight and nonzero-weight cases), candidate-identity
+  mismatch rejection, and an end-to-end batch-wiring test against a small synthetic Stage III
+  dataset (not the real 280-candidate one, which is the notebook's job).
+
+#### Tests
+
+```text
+python -m unittest tests.test_phase3_composite -v
+Ran 34 tests in 0.040s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 669 tests in 24.222s
+OK
+```
+
+#### Manual check (real data) — `notebooks/T36_composite_check.ipynb`
+
+Regenerated all 280 real candidates + 72 support grids (104.9s), computed DEFAULT-config
+`source_score` for all of them (73.0s), plus the two sensitivity configurations (147.3s
+combined). All cells executed via `jupyter nbconvert --execute`, zero errors, zero `NaN`
+scores.
+
+```text
+configured weights: {support:0.35, persistence:0.20, convergence:0.10, dispersion:0.15,
+                      ais:0.20, initial_bias:0.00, persistence_count:0.00}
+effective weights (AIS unavailable, identical for all 280 real candidates):
+                     {support:0.4375, persistence:0.25, convergence:0.125, dispersion:0.1875,
+                      ais:0.00, initial_bias:0.00, persistence_count:0.00}
+sum of effective weights: 1.000000
+candidates with AIS available: 0 / 280
+
+source_score distribution (280 candidates, 0 NaN):
+  mean=0.5636  std=0.3953  min=0.2006  p10=0.2693  p25=0.2909  median=0.2935
+  p75=1.0331  p90=1.1936  p95=1.3148  max=1.4620
+
+Spearman(source_score, raw_support_score), all 280 candidates: 0.7156
+mean |rank change| = 46.29, max |rank change| = 153 (out of 280)
+
+Sensitivity (Spearman rank correlation between configurations):
+  Spearman(DEFAULT, PERSISTENCE-EMPHASIS)             = 0.9992
+  Spearman(DEFAULT, DISPERSION-EMPHASIS)              = 0.9982
+  Spearman(PERSISTENCE-EMPHASIS, DISPERSION-EMPHASIS) = 0.9962
+  PERSISTENCE-EMPHASIS overlap with DEFAULT top-10: 9/10
+  DISPERSION-EMPHASIS overlap with DEFAULT top-10:  10/10
+```
+
+**Major flagged finding — top-10 overlap with raw Support is 0/10:**
+
+```text
+top-10 by raw T17 support_score:          all 2019-10-14 13:00-22:00 (ages 1-10h)
+top-10 by T36 source_score (DEFAULT):     all 2019-10-11 23:00 - 2019-10-12 08:00 (ages 63-72h)
+```
+
+Every candidate in both top-10 lists is the SAME single dominant T31 track's own `cand000`
+member at a different hour — the DEFAULT composite ranking is a complete inversion of the
+raw-Support ranking WITHIN that one track, not a comparison across different candidates.
+**Mechanism (verified against each component's own already-approved behavior, not a new
+finding requiring further investigation):**
+
+1. `support_evidence` (T29/T34) is already flattened across this track's own members by
+   T29's per-timestamp percentile normalization (T29's own approved real-data check found
+   this track's normalized values cluster `~1.1-1.5` regardless of hour) — no longer
+   strongly favors recent hours the way raw `support_score` does.
+2. `persistence_evidence` is IDENTICAL across every member of this one track
+   (`temporal_continuity=1.000` for all 72 members, since it's a single unbroken track) — a
+   tie, contributes no differentiation among these particular candidates.
+3. `dispersion_evidence` is exactly T33's own already-approved, already-flagged
+   top-candidate-level finding (`Pearson +0.863` to `+0.951` with age) — rising sharply from
+   `~0.96` near `t_obs` to `~2.65` near `T72` for this exact track. With persistence tied and
+   support flattened, this is the dominant remaining differentiator, and it favors OLD hours.
+4. `convergence_evidence` pulls the opposite direction (candidate-level age correlation
+   `-0.593, Pearson`, section 3 of the design spec) but at a smaller effective weight
+   (`0.125` vs. dispersion's `0.1875`) and, empirically, a smaller magnitude swing across
+   this track's own members — insufficient to counteract (3).
+
+**This is not a bug and not an accidentally-reintroduced age term** — `compute_source_score`
+and `compute_source_scores_for_candidates` were structurally confirmed (test suite) to
+accept no `age`/`t_obs` parameter anywhere. It is the correct, direct, already-anticipated
+consequence of including T33's own approved dispersion evidence (with a nonzero weight, as
+specified) for a population where the age-correlated component happens to dominate the
+tie-broken remainder. **This finding is reported for review, not resolved or endorsed as
+correct/desirable here** — whether a top-10 built almost entirely from the OLD end of the
+single dominant track (rather than distinct spatial candidates) is a useful or intended
+outcome of this weighting is a judgment call for the user, not something this task decides.
+
+#### Pairwise correlations among active evidence components + `source_score` (this run, 280 candidates)
+
+```text
+Pearson:
+              support  persistence  convergence  dispersion  initial_bias  source_score
+support         1.000        0.305        0.934       0.927         0.979         0.994
+persistence     0.305        1.000        0.353       0.278         0.291         0.337
+convergence     0.934        0.353        1.000       0.775         0.973         0.910
+dispersion      0.927        0.278        0.775       1.000         0.852         0.960
+source_score    0.994        0.337        0.910       0.960         0.959         1.000
+```
+
+`source_score` correlates very strongly with `support_evidence` (`0.994`) ACROSS THE WHOLE
+280-candidate population (dominated by the large minor-vs-dominant split, section 4 of the
+design spec) even though, AT THE TOP TIER specifically, the ranking inverts relative to raw
+`support_score` (see above) — these are not contradictory: `support_evidence` (T29/T34-
+normalized) is a different quantity from raw `support_score`, and population-level
+correlation is a different question from top-10 ranking order.
+
+#### Known limitations
+
+- The zero-top-10-overlap finding (above) has not been independently validated against any
+  ground truth (none exists for this project) — it demonstrates the composite is NOT simply
+  raw Support relabeled, per the task's own test requirement, but does not by itself
+  validate that the resulting ranking is more physically correct.
+- Weights remain heuristic/configurable, not scientifically validated (restated per every
+  prior Phase 3 task).
+- `w_ais`'s real effect remains entirely untested — no AIS data exists.
+- No claim that `source_score` is calibrated, and **the top-ranked candidate is NOT proven
+  to be the actual physical source** — restated explicitly per instruction.
+- No Stage III module, and no existing T14-T35 module, was modified.
+
+### T36 review diagnostic: dominant-track member-by-member breakdown (2026-09-24, no production weights changed)
+
+Requested before further review, to determine whether the top-10 inversion (above) reflects
+meaningful relative concentration or a T33-specific artificial age reward. `iste/
+phase3_composite.py` was NOT modified for this diagnostic; sections F/G below construct
+diagnostic-only `CompositeWeights` instances passed into the existing, unmodified
+`compute_source_score` — `DEFAULT_WEIGHTS` itself is never changed. 17 new cells appended to
+`notebooks/T36_composite_check.ipynb` (one import bug in the first appended cell was caught
+and fixed before the final successful execution).
+
+**Dominant track:** `track0000`, 72 members (T1-T72), `continuity=1.000` throughout.
+
+**A/B — within-track Spearman correlation with age (raw evidence == weighted contribution,
+confirming a positive constant multiplier never changes rank correlation):**
+
+```text
+support_evidence       Spearman=+0.9088
+convergence_evidence   Spearman=-0.9925
+dispersion_evidence    Spearman=+0.8621
+persistence_evidence   constant (continuity=1.0 for all 72 members of one unbroken track)
+```
+
+**Correction to the prior turn's explanation:** `support_evidence` is NOT flat within this
+track (as previously suggested) — it is itself strongly age-correlated (`+0.91`) within
+this specific track, second only to `convergence_evidence`'s strength. `persistence_
+evidence` is the only literally flat (zero-variance) component here.
+
+**C/D/E — exact decomposition of the oldest(72h)-vs-newest(1h) composite score gap
+(`+0.4290` total):**
+
+```text
+T33 (dispersion)   contribution: +0.3174  (74.0%)
+T29/T34 (support)  contribution: +0.1369  (31.9%)
+T32 (convergence)  contribution: -0.0253  (-5.9%, partial offset)
+T31 (persistence)  contribution: +0.0000  (0.0%, tied)
+sum = +0.4290 (exact)
+```
+
+T33 is the single largest contributor, but NOT the only one pulling toward older ages —
+T29/T34's own already-approved residual trend contributes nearly a third of the gap; T32 is
+the only component pulling the other way, and only partially.
+
+**F — T33 removed entirely (diagnostic weights, transparently renormalized, production
+`DEFAULT_WEIGHTS` untouched):**
+
+```text
+effective weights without T33: support=0.538, persistence=0.308, convergence=0.154, rest=0
+Spearman(age, score) WITHOUT T33 = +0.8712   (WITH T33 = +0.9032)
+oldest rank WITHOUT T33 = 21/72              (WITH T33 = 1/72)
+newest rank WITHOUT T33 = 71/72              (WITH T33 = 67/72)
+```
+
+**Central finding: removing T33 completely barely changes the overall age-correlated
+SHAPE of the within-track ranking (`+0.87` vs. `+0.90` Spearman)** — it mainly determines
+whether the single oldest candidate specifically reaches literal rank 1 (drops to 21/72
+without T33) rather than driving the age-correlation pattern itself, which is substantially
+present even at `w_dispersion=0`.
+
+**G — diagnostic T33-weight sweep (0, 0.05, 0.10, 0.15, 0.20; other weights rescaled
+proportionally to preserve their relative ratios; `DEFAULT_WEIGHTS` never modified):**
+
+```text
+w_dispersion=0.00: Spearman(age,score)=+0.8712  oldest_rank=21/72  newest_rank=71/72
+w_dispersion=0.05: Spearman(age,score)=+0.9077  oldest_rank= 4/72  newest_rank=71/72
+w_dispersion=0.10: Spearman(age,score)=+0.9088  oldest_rank= 1/72  newest_rank=68/72
+w_dispersion=0.15: Spearman(age,score)=+0.9032  oldest_rank= 1/72  newest_rank=67/72
+w_dispersion=0.20: Spearman(age,score)=+0.8950  oldest_rank= 1/72  newest_rank=64/72
+```
+
+The overall Spearman correlation stays in a narrow `+0.87` to `+0.91` band across the entire
+sweep — not strongly sensitive to T33's specific weight. T33's main effect is pushing the
+single oldest candidate to literal rank 1 once its weight reaches `~0.10`, not creating the
+age-correlated shape from nothing.
+
+**Physical diagnostics (sample rows, full 72 in the notebook/CSV):**
+
+```text
+age  covariance_det   candidate_density  population_median_density  T33_expected  T33_ratio
+72h  5.14e13          340                153                        128.2         2.652
+36h  8.20e12          547                266                        516.2         1.060
+6h   2.01e11          1796               1337                       1905.4        0.943
+```
+
+Both `candidate_local_density` and `population_median_local_density` DECLINE with age (the
+candidate's own absolute density falls from 1796 near `t_obs` to 340 at T72) — the candidate
+does NOT become more concentrated in absolute terms further back. What rises is the RATIO:
+the Gaussian-modeled `expected_density` declines even FASTER than the actual candidate
+density does, so `t33_dispersion_ratio` climbs. A fully model-free cross-check —
+`empirical_ratio = candidate_local_density / population_median_local_density` (no Gaussian
+assumption at all) — shows the SAME qualitative pattern and an EVEN STRONGER age correlation
+(`Spearman +0.9431` vs. T33's own `+0.8621`), directly consistent with T33's own earlier
+closed empirical-null diagnostic (which also found the model-free version stronger, not
+weaker, than the Gaussian one).
+
+**Answer to the stated purpose, stated carefully:** the evidence supports "T33 (and, to a
+lesser but real extent, T29/T34) reflect a genuine, model-robust pattern in how this
+particular dominant candidate's density compares to its own timestamp's population, which
+happens to increase toward older timestamps in this real run" rather than "T33 is a Gaussian-
+model artifact manufacturing an age reward" (the model-free ratio shows the same, even
+stronger, pattern; the anisotropic-vs-isotropic diagnostic already ruled out model-shape
+artifacts). It does **not** support "T33 alone creates the observed top-10 inversion" — the
+age-correlated ranking shape is substantially present even with T33's weight at exactly
+zero, and T29/T34 contributes nearly a third of the specific oldest-vs-newest gap. **This
+diagnostic does not conclude that older or newer timestamps are more likely to be the true
+source, and does not establish source identity** — it characterizes a measured property of
+this real dominant candidate's evolving relationship to its own population, nothing more.
+
+Artifacts: `results/actual_data/T36_dominant_track_diagnostic.png`,
+`t36_track_diagnostic.csv` (scratchpad, full 72-row table).
+
+**T36 approved 2026-09-24.** All three review diagnostics (design spec + amendments,
+real-data validation, dominant-track member-by-member breakdown) are closed; `iste/
+phase3_composite.py` and `DEFAULT_WEIGHTS` stand as implemented, unmodified since approval.
+
+### T37 — Spatial clustering of candidates (PENDING_REVIEW)
+
+### Files added
+
+- `iste/phase3_clustering.py` — `CandidateCluster` dataclass (centroid, `spatial_radius_m`,
+  `area_m2` via `scipy.spatial.ConvexHull` with the same `<3`-points/degenerate `None`
+  fallback T28 already established, `total_particle_support`, `supported_timestamps`/
+  `n_distinct_timestamps`/`earliest_t_s`/`latest_t_s`/`temporal_span_hours`, `mean_
+  normalized_kde`/`peak_normalized_kde` — T29/T34's `support_evidence`, the ONLY axis for
+  that evidence lineage, per T36's own established rule — `mean_convergence_score`, `mean_
+  dispersion_score`, `mean_initial_bias_influence`, `mean_ais_score` (`None` when no member
+  has AIS available, never fabricated), `peak_source_score`/`mean_source_score`, and
+  `confidence_uncertainty_note` — an explicit statement that T38 is not yet implemented,
+  not a fabricated placeholder number) + `cluster_candidates(candidates, source_scores, *,
+  eps_m=2000.0, min_samples=1)`. Uses `sklearn.cluster.DBSCAN` (already an available
+  dependency; confirmed installed, `1.9.0`) with a precomputed pairwise distance matrix built
+  from the SAME local-tangent-plane projection T15/T17/T30/T31/T36 already use
+  (`iste.kdtree_neighborhood.project_to_local_metres`, reused unchanged). `eps_m` defaults to
+  T31's own `spatial_matching_radius_m` (2 km) — reused, not re-derived. `min_samples=1` is a
+  deliberate choice so DBSCAN never labels a candidate as noise, consistent with Phase 2/3's
+  standing "never silently drop a candidate" policy; documented in the module docstring as
+  mathematically equivalent to single-linkage hierarchical clustering at the same threshold
+  (both reduce to the same connected-components-within-`eps` partition) — DBSCAN was picked
+  for its direct scikit-learn API, not because it produces a different result from the
+  hierarchical alternative. Output is sorted by `peak_source_score` descending (ranked
+  clusters, per the master spec's "rank CLUSTERS rather than individual pixels").
+- `tests/test_phase3_clustering.py` — 21 `unittest` cases: the two required checks (near-
+  duplicate candidates — including a transitively-chained 5-point sequence — collapse into
+  one cluster; well-separated candidates remain distinct, confirmed via unique cluster
+  membership), no-candidate-dropped (an isolated candidate forms its own singleton, never
+  excluded as noise), geometry (hand-computed centroid, `area_m2=None` for `<3` members and
+  for exactly-collinear members, defined and positive for a real triangle), evidence
+  aggregation (hand-computed `total_particle_support` sum, `normalized_kde` mean/peak,
+  `source_score` mean/peak, `AIS` mean-over-available-only and `None`-when-none-available,
+  temporal span/distinct-timestamp count), the confidence-placeholder's explicit deferred-
+  to-T38 wording, ranked-output ordering, and validation (mismatched lengths/candidate-id
+  order, non-positive `eps_m`, empty input, single-candidate edge case).
+- `notebooks/T37_clustering_check.ipynb` — manual-check artifact (see below).
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_clustering -v
+Ran 21 tests in 0.035s
+OK
+
+python -m unittest discover -s tests -v   (full suite)
+Ran 690 tests in 22.630s
+OK
+```
+
+### Manual check (real data)
+
+`notebooks/T37_clustering_check.ipynb` regenerates all 280 real candidates (79.6s), computes
+T36 `DEFAULT_WEIGHTS` composite scores (46.0s, reused unchanged), then clusters them.
+Executed via `jupyter nbconvert --execute`, zero errors.
+
+```text
+DEFAULT_EPS_M = 2000.0 m
+280 raw candidates -> 10 distinct spatial clusters
+every candidate accounted for exactly once: confirmed (280 == 280)
+
+cluster size distribution: min=1, max=147, mean=28.00, median=2.5
+n singleton clusters (1 member): 4
+n clusters with >=5 members: 4
+```
+
+Top cluster (`cluster0000`): **147 members** (52.5% of all real candidates), `spatial_
+radius_m=24439.1` (~24.4 km!), `n_distinct_timestamps=72`, `temporal_span_hours=71.0`,
+`peak_source_score=1.4620`, `total_particle_support=56840.0`.
+
+**Real-data finding requiring explicit awareness (not silently accepted as unambiguously
+correct):** `cluster0000` is essentially the ENTIRE 71-hour dominant T31 track (whose
+consecutive hourly steps were separately measured, at T31 approval, to be at most `1362.6 m`
+apart — always well under `eps_m=2000`), transitively chained by DBSCAN's `min_samples=1`
+single-linkage-equivalent behavior into one nominal "cluster" that in reality spans ~24 km —
+a multi-hour drift corridor, not a compact source region in the intuitive sense the word
+"cluster" suggests. This is not a bug: the task's own literal check (near-duplicates
+collapse; well-separated candidates remain distinct) is satisfied exactly as specified, and
+this is the well-known, well-documented "chaining" behavior of single-linkage-style
+clustering applied to a trajectory of closely-spaced sequential points. It is reported here
+prominently, per this session's standing discipline, rather than presented as an
+unqualified success.
+
+### Known limitations
+
+- `eps_m`/`min_samples` are documented, reused (not re-derived) PROTOTYPE/CONFIGURATION
+  choices — fully overridable; a smaller `eps_m` or a non-chaining algorithm (e.g. a
+  different linkage criterion, or DBSCAN with `min_samples>1`) would very likely split the
+  dominant track's trajectory into multiple sub-regions instead of one 24 km chain — not
+  attempted here, since changing the algorithm/threshold to force a different real-data
+  outcome would be exactly the "tune to a desired result" this whole session has avoided.
+- Cluster-level `peak_source_score`/`mean_source_score` inherit every caveat already
+  established for T36's per-candidate `source_score` — an evidence-ranking score, not a
+  probability, not proof of source identity.
+- `confidence_uncertainty_note` explicitly defers to T38 — no confidence/uncertainty number
+  is computed by this task.
+- No Stage III module, and no existing T14-T36 module, was modified.
+
+### T38 — Uncertainty / bootstrap stability analysis (DONE, approved 2026-09-24)
+
+### Files added
+
+- `iste/phase3_uncertainty.py` -- `compute_total_available_particles`, `compute_spatial_
+  uncertainty_radius_km`, `compute_temporal_uncertainty_hours`, `BootstrapConfig`/
+  `BootstrapResult`/`run_bootstrap_stability`, `ClusterUncertainty`/`compute_cluster_
+  uncertainty_table`, `AgeUncertaintyDiagnostic`/`diagnose_uncertainty_vs_age`. Reads T17
+  `Candidate`/T36 `SourceScore`/T37 `CandidateCluster`/Stage III `EnsembleRunRecords`
+  read-only; does not modify or re-derive any T14-T37 value.
+- `tests/test_phase3_uncertainty.py` -- 21 `unittest` cases.
+- `notebooks/T38_uncertainty_check.ipynb` -- manual-check artifact (see below).
+
+### Design summary (see the module's own docstring for full derivations)
+
+- **Particle identity:** `(particle_id, forcing_member_id)` -- the SAME grouping key T14's
+  `query_particle_slice` already uses (one physical particle under one forcing-ensemble
+  member is one distinct stochastic realization). Repeated hourly appearances of the same
+  pair are counted once, never once per hour.
+- **Part A, `particle_support_fraction`:** numerator = size of the UNION, over a cluster's
+  member candidates, of the distinct particle-identity pairs in each candidate's own
+  already-computed T16 `peak_support_features.neighborhood` (no re-query). Denominator =
+  distinct particle-identity pairs across the WHOLE Stage III `records` batch (the fixed,
+  timestamp-independent particle-member pool of the entire run — chosen over a per-
+  timestamp count specifically so the fraction stays comparable across clusters whose
+  members sit at different timestamps).
+- **Part B, `persistence_fraction`:** `cluster.n_distinct_timestamps / total_timestamps`,
+  `total_timestamps` defaulting to 73 (T27's own `generate_analysis_grid(window_hours=72,
+  interval_hours=1)` length, T0..T72 inclusive — verified directly from `iste/
+  analysis_grid.py`, not assumed). No minimum-duration threshold, no age-based reward.
+- **Part C, `uncertainty_radius_km`:** the 90th percentile (configurable,
+  `DEFAULT_SPATIAL_PERCENTILE`) of the SAME pooled distinct-particle set's distance from
+  the cluster's own T37 centroid, in km. Explicitly documented as NOT T37's
+  `spatial_radius_m` renamed: that field is the extent of a handful of discrete candidate
+  PEAK positions; `uncertainty_radius_km` is the spread of the (typically far larger)
+  underlying PARTICLE evidence. A percentile-of-actual-positions measure was chosen over a
+  covariance/ellipse form specifically to avoid stacking another Gaussian/isotropy
+  assumption on top of T30/T33's own, and because it reuses Part A's pooled-particle set
+  exactly (no second, differently-defined particle pool).
+- **Part D, `temporal_uncertainty_hours`:** T36-`source_score`-weighted standard deviation
+  (hours) of the cluster's own member candidate timestamps (equal-weight fallback if any
+  weight is negative/non-finite/sums to <=0, documented). Explicitly NOT T37's
+  `temporal_span_hours` (a raw max-min extent) -- this is an evidence-weighted spread.
+  `0.0` for a single-member cluster, documented as "no internal spread to measure," not a
+  claim of exact certainty.
+- **Part E, bootstrap -- practicality assessed BEFORE implementing, per instruction:** a
+  full bootstrap re-running Stage III or rebuilding the whole T16 support grid per
+  replicate was assessed and REJECTED as impractical: regenerating the real dataset's 280
+  candidates measured ~62-80s per pass across this session's runs, and T14's
+  `query_particle_slice` loops in pure Python over all 240,024 real records per call;
+  repeating either per bootstrap replicate (even 100-200 replicates) would cost tens of
+  minutes to hours, and Part E's own instructions separately prohibit rebuilding the whole
+  simulation per replicate. **What WAS implemented instead (bootstrap WAS actually run, not
+  skipped):** each candidate's own already-computed T16 neighborhood (already-found nearby
+  particles, never re-queried) is resampled WITH REPLACEMENT independently per candidate
+  per replicate -- `D_boot` = count of DISTINCT particle-identity pairs in the resample
+  (repeats not double-counted, mirroring the identity rule used everywhere else in this
+  module), `W_boot` = sum of `exp(log_weight)` over all resampled draws (a SUM statistic,
+  counted with multiplicity, standard for resampling a weighted sum), `V_boot` = distinct
+  `observation_pixel_id` count among the resample -- combined via the candidate's own
+  already-used `linear_support_function`/`SupportFeatureConfig` (T16, unchanged, no new
+  combination formula). The T29/T34 normalization reference value is NOT re-derived per
+  replicate (that would require the same expensive whole-grid rebuild being avoided);
+  instead the already-computed `screening_score` is algebraically SCALED by the bootstrap/
+  original raw-support ratio, which is exact given T34's own `screening_score = support /
+  reference_value` formula and a per-timestamp-constant `reference_value`. Every OTHER
+  evidence component (T31/T32/T33/T35) is held at its original value per replicate --
+  **this scopes the bootstrap to testing T29/T34 support-evidence stability specifically,
+  not the full six-component pipeline**, stated explicitly in the module docstring and the
+  notebook, never hidden. Recombination reuses T35's own unmodified
+  `renormalize_weighted_mean` with the same configured weights -- no new formula.
+  Because candidate POSITIONS never change (only their evidence VALUES are perturbed),
+  cluster membership is identical to the original T37 assignment in every replicate by
+  construction -- no spatial re-matching rule was needed, and this is stated explicitly
+  rather than silently assumed away.
+- **`BootstrapConfig`:** `n_replicates=200`, `random_seed=42`, `top_k=10` -- explicit,
+  configurable, PROTOTYPE/CONFIGURATION, not scientifically validated.
+  `candidate_stability_percent` = 100 * (replicates in which the cluster owned >=1 of that
+  replicate's top-`top_k` candidates) / `n_replicates`. Reported as `None` ("unavailable"),
+  never `0.0`, whenever bootstrap was not run.
+- **Language discipline (per explicit instruction):** every user-facing string uses
+  "candidate stability" / "ranking stability" / "cluster recurrence" / "uncertainty" --
+  never "probability of source identity." `STABILITY_DISCLAIMER` and T36's own
+  `EVIDENCE_RANKING_DISCLAIMER` are both carried onto every `ClusterUncertainty` row.
+
+### Tests
+
+```text
+python -m unittest tests.test_phase3_uncertainty -v
+Ran 21 tests in 0.056s
+OK
+
+python -m unittest discover -s tests   (full suite)
+Ran 711 tests in 14.289s
+OK
+```
+
+Covers: hand-computed `particle_support_fraction` (union-of-neighborhoods numerator, whole-
+run denominator, shared-particle de-duplication, denominator inflated by non-candidate
+particles), `persistence_fraction` (default-73 denominator, scaling with distinct
+timestamps), spatial uncertainty (grows with actual particle spread, `NaN` for an empty
+pool, percentile validation), temporal uncertainty (`0.0` for one member, hand-computed
+weighted std for two equally-weighted members), bootstrap (reproducible under a fixed seed,
+stays within `[0, 100]`, a dominant high-support candidate is MORE stable than a
+deliberately weak one, no NaN/Inf), graceful degradation (`None` not `0.0` when no
+bootstrap; `"unavailable"` AIS status), no mutation of T36 `source_score`/T37 cluster
+membership, no NaN/Inf on valid input, `total_timestamps` defaults to 73, and an explicit
+"age is not hard-coded into the formula" test (two candidates at very different ages but
+IDENTICAL particle spread get IDENTICAL `uncertainty_radius_km`).
+
+### Manual check (real data)
+
+`notebooks/T38_uncertainty_check.ipynb` reproduces T37's own real-data setup (Sections 1-3,
+unchanged: 280 candidates regenerated in 61.7s, T36 `DEFAULT_WEIGHTS` scores computed in
+39.9s, clustered into 10 T37 clusters), then runs T38 on top. Executed via `jupyter
+nbconvert --execute`, zero errors.
+
+```text
+total_available_particles (distinct (particle_id, forcing_member_id) pairs) = 3288
+bootstrap performed: True, n_replicates_run=200, measured runtime: 2.88s
+T36 source_score values unchanged: confirmed
+T37 cluster IDs/membership unchanged: confirmed
+
+cluster_id   spatial_radius_km  uncertainty_radius_km  temporal_uncertainty_hours  supporting_particle_count  particle_support_fraction  supported_timestamp_count  persistence_fraction  candidate_stability_percent
+cluster0000             24.439                 25.157                       20.76                       3015                    0.91697                         72                0.9863                        100.0
+cluster0002             10.034                  8.423                        9.01                        377                    0.11466                         34                0.4658                          0.0
+cluster0006              6.301                  2.625                        4.15                         12                    0.00365                         15                0.2055                          0.0
+cluster0004              0.000                  0.843                        0.00                          3                    0.00091                          1                0.0137                          0.0
+cluster0005              0.000                  0.957                        0.00                          3                    0.00091                          1                0.0137                          0.0
+cluster0009              0.361                  0.971                        0.50                          1                    0.00030                          2                0.0274                          0.0
+cluster0008              0.000                  0.954                        0.00                          1                    0.00030                          1                0.0137                          0.0
+cluster0003              1.774                  1.258                        3.57                          2                    0.00061                         11                0.1507                          0.0
+cluster0007              0.000                  0.923                        0.00                          1                    0.00030                          1                0.0137                          0.0
+cluster0001              1.071                  1.201                        0.82                          1                    0.00030                          3                0.0411                          0.0
+
+number of T37 clusters: 10; all with finite uncertainty metrics; 0 NaN, 0 Inf
+all T37 clusters accounted for exactly once: confirmed (280 == 280)
+all 73 T0..T72 analysis timestamps confirmed present
+```
+
+Every AIS status is `"unavailable"` (no AIS data exists in this project, per T35).
+
+**Part F age/spread diagnostic (10 real clusters -- a small sample, reported honestly, not
+tuned to a particular trend):**
+
+```text
+pearson(age_hours, uncertainty_radius_km)   = 0.4141   spearman = 0.4545
+pearson(age_hours, temporal_uncertainty_hours) = 0.4397   spearman = 0.4788
+pearson(mean_particle_spread_km, uncertainty_radius_km)  = 0.9985   spearman = 0.9636
+```
+
+The age correlations are moderate (not strong, not zero, not contradictory) -- reported as-
+is. The near-1.0 spread-vs-uncertainty-radius correlation is EXPECTED, not an independent
+finding: `uncertainty_radius_km` is itself computed as a percentile of that same pooled-
+particle spread distribution (Part C), so this is a consistency/sanity check on the
+implementation, not a second, independent validation of the uncertainty measure.
+
+**Dominant cluster (`cluster0000`, 147 members, the same T37 DBSCAN-chained 71-hour
+corridor flagged at T37 approval):** `uncertainty_radius_km=25.16` km -- correctly larger
+than, and consistent with, T37's own `spatial_radius_km=24.44` (both reflect the real
+corridor's real width; `uncertainty_radius_km` was NOT artificially shrunk to look more
+"source-like"). `candidate_stability_percent=100.0` -- read per the notebook's own explicit
+caveat: this means SOME point along the 147-member corridor consistently lands in the
+bootstrap top-10 across resamples, not that the whole 24 km corridor is one compact,
+confirmed source.
+
+### Known limitations
+
+- `DEFAULT_TOTAL_TIMESTAMPS=73` and `DEFAULT_SPATIAL_PERCENTILE=90.0` are explicit,
+  documented, fully overridable PROTOTYPE/CONFIGURATION choices, not scientifically
+  validated constants.
+- The bootstrap's scope is deliberately narrower than the full six-component T36 pipeline
+  (T29/T34 support evidence only is resampled; T31/T32/T33/T35 held fixed per replicate) --
+  a stated, not hidden, limitation driven by the measured impracticality of a full-pipeline
+  bootstrap on this dataset's runtime.
+- The T29/T34 normalization reference value is scaled, not re-derived, per bootstrap
+  replicate (see Design summary above).
+- Part F's correlations are computed over only 10 real clusters -- too small a sample to
+  treat as a strong statistical result either way.
+- `candidate_stability_percent` for a DBSCAN-chained corridor cluster (like `cluster0000`)
+  reflects recurrence of ANY member along the corridor, not a single compact point --
+  stated explicitly in both the notebook and this file.
+- No T14-T37 module was modified; T36 `source_score` values and T37 cluster IDs/membership
+  are confirmed byte-for-byte unchanged by the real-data notebook (Section 6).
+
+### T39 — Visualization suite + old-vs-new ranking comparison (PENDING_REVIEW)
+
+### Files added
+
+- `notebooks/T39_visualization_comparison.ipynb` -- the only new artifact. No new `.py`
+  module: this task is pure orchestration/plotting over already-approved T14-T38 output
+  (candidate/score/cluster/uncertainty recomputation reuses `iste.phase3_composite.
+  compute_source_scores_for_candidates`, `iste.phase3_clustering.cluster_candidates`,
+  `iste.phase3_uncertainty.{run_bootstrap_stability,compute_cluster_uncertainty_table}`,
+  and `iste.phase3_diagnostics.compute_diagnostics_table` unchanged), per CLAUDE.md's own
+  ".ipynb = experiments, plots, debugging, manual validation" rule.
+- `results/actual_data/T39_old_vs_new_ranking.csv`, `T39_stage13_diagnostics_table.csv`,
+  `T39_selected_snapshots.png`, `T39_persistence_heatmap.png`, `T39_final_map.png`.
+
+### Design summary
+
+- **Old method (`T17-raw-support baseline`):** exactly `main_actual_data_pipeline.ipynb`'s
+  own documented Section 10 selection rule -- rank all candidates by raw T17
+  `support_score` (`Support(x,y,t)=f(D,W,V)`) descending, no cross-timestamp correction.
+- **New method:** rank the same candidates by T36 `source_score`, unmodified.
+- **Comparison table:** the union of each method's own top-10 (20 unique candidates on
+  this real run since the two sets did not overlap at all), with `support_duration_hours`
+  from T31's own `PersistenceTrack.persistence_duration_hours`, `distance_from_observed_km`
+  from the candidate peak to the observed slick's own mean parcel position (via the
+  project's standing `project_to_local_metres` convention), `particle_support` = T16's
+  `density_score`, `AIS_support` = T35's `ais_evidence` (`"unavailable"`, never fabricated),
+  `screening_support` = T29/T34's `support_evidence`.
+- **Selected-snapshot panels:** extends `main_actual_data_pipeline.ipynb`'s existing
+  4-panel hotspot-heatmap pattern to the 8 explicitly requested snapshots (T0, T0-6h,
+  T0-12h, T0-24h, T0-36h, T0-48h, T0-60h, T0-72h), red star = new-method top-10 candidate.
+- **Persistence heatmap:** top-10 T37 clusters (rows) x 73 hourly slots (columns), color =
+  each present member candidate's own T36 `source_score`; blank cells = no member at that
+  hour (never fabricated as 0).
+- **Final map:** observed slick (548 real parcels), a convex-hull outline of ALL pooled
+  valid-particle positions across every T0-T72 timestamp (236,736 pooled positions, purely
+  descriptive spatial extent), top-10 T37 cluster centroids, each cluster's own T38
+  `uncertainty_radius_km` (P90) drawn as a circle, and an explicit "AIS tracks:
+  unavailable" label (never a fabricated/empty-looking AIS layer presented as data).
+- **Stage 13/T28 diagnostic table:** `iste.phase3_diagnostics.compute_diagnostics_table`
+  called directly over the full 73-point analysis grid (a necessary second sweep, since
+  T28's function does not accept a precomputed support map -- an accepted, documented,
+  one-time cost).
+
+### Manual check (real data)
+
+Executed via `jupyter nbconvert --execute`, zero errors.
+
+```text
+observed slick: ow-0008.jpg, 548 parcels, reference point (mean) = (34.07660, 35.26621)
+loaded 240024 real rows; full analysis grid has 73 timestamps (T0..T72)
+regenerated 280 real candidates in 70.5s; pooled 236736 valid particle positions for the envelope
+computed T36 scores + T37 clusters (10 clusters) in 39.2s
+computed T38 uncertainty for 10 clusters (bootstrap runtime 2.92s)
+computed Stage 13/T28 diagnostics for 73 timestamps in 59.1s
+```
+
+**Old-vs-new comparison (union of top-10s, 20 unique candidates, 0 overlap):**
+
+```text
+old-top-10 candidates NOT in new-top-10: 10
+new-top-10 candidates NOT in old-top-10: 10
+candidates in BOTH top-10 sets: 0
+old_rank=1 candidate: 2019-10-14T22:00:00_cand000 (t_s=T0-2h, support_score=4675.4308)
+new_rank=1 candidate: 2019-10-11T23:00:00_cand000 (t_s=T0-71h, source_score=1.4620)
+```
+
+The full new-top-10 (all from the dominant 71-hour T37/T38 track/cluster already flagged
+at those approvals) has `new_score` 1.383-1.462; the full old-top-10 (all from T0-1h
+through T0-10h) has `old_score` 855-997. `distance_from_observed_km` for the new-top-10
+ranges ~32-37 km (far from the observed slick, consistent with a 65-71 hour-old backward
+position); for the old-top-10 (not shown in full here, see `T39_old_vs_new_ranking.csv`)
+the closest-to-observed candidates (T0-2h through T0-13h) score HIGHEST under the OLD
+method purely from raw KDE concentration, and correspondingly LOW under the new method
+(`new_rank` 45-71) once T29's per-timestamp normalization removes that concentration bias
+-- e.g. the `old_rank=1` candidate (`support_score=4675.4`) drops to `new_rank=71`
+(`source_score=1.0331`).
+
+**Validation checklist:** all 6 checks passed (zero-error execution, all 73 timestamps
+present, comparison table >=10 candidates, genuine re-ranking confirmed, T37 cluster count
+unchanged at 10, AIS reported `"unavailable"` never fabricated).
+
+**Written explanation (required deliverable) -- why early timestamps no longer dominate
+purely from KDE concentration:** T28's own real-data diagnostic already measured that the
+raw T16 support/KDE grid's peak is far larger near `t_obs` purely because the particle
+cloud is still tightly clustered shortly after release, not because early timestamps are
+better source candidates. Left uncorrected (`old_score`/`old_rank`), this mechanically
+favors whichever timestamp has the tightest cloud, which is structurally always near `T0`.
+T29 fixes this by dividing each timestamp's own support grid by that SAME timestamp's own
+95th-percentile-of-positive-cells reference value -- comparing each candidate to its own
+timestamp's concentration level, not to T0's raw scale. T31-T35 then add temporal
+persistence, convergence, dispersion-relative concentration, and (when available) AIS
+evidence, none of which contain an age term (verified at each task's own approval). T36's
+`source_score` is the renormalized weighted combination of exactly these corrected,
+age-free evidence streams -- and the REAL-DATA RESULT above (0/10 top-10 overlap, not a
+constant rescaling) demonstrates this is a genuine re-ranking under corrected evidence,
+not simply the old order divided by a constant.
+
+**This describes what the corrected evidence produces on this real dataset, not a claim
+that the new top-ranked candidate is the proven physical source** -- `source_score` remains
+an evidence-ranking score (T36's own `EVIDENCE_RANKING_DISCLAIMER`), and this is the exact
+same dominant age-correlated track T36's own approved dominant-track diagnostic already
+found to be a real, multi-component evidence pattern in this dataset, not a T29/T33-
+specific artifact -- reported honestly here again, not tuned away.
+
+### Known limitations
+
+- Comparison table shows the union of each method's own top-10 (20 candidates here), not
+  all 280 -- the full per-candidate ranking is saved to `T39_old_vs_new_ranking.csv`.
+- Persistence heatmap covers only the top-10 T37 clusters (the full set on this dataset).
+- Particle envelope is a purely descriptive spatial extent (convex hull of all pooled
+  valid particle positions across the whole window), not a claim about source location.
+- `distance_from_observed_km`'s reference point (observed slick's mean parcel position) is
+  an explicit, documented choice, not a new geodesic formula.
+- The Stage 13/T28 diagnostic table required a second full 73-timestamp sweep (accepted,
+  one-time cost, not a claim of the cheapest possible implementation).
+- No T14-T38 module was modified.
+
+### EVENT/DATA CORRECTION — June 2019 full pipeline rerun (2026-09-24)
+
+`data/ocean.nc`/`data/wind.nc` were replaced (by the project owner) with real June 2019
+ocean-current/wind data, correcting the event/data mismatch flagged at the original run
+(the October-anchored run used `data/ocean.nc`'s own last checkpoint as `t_obs` because,
+at that time, no ocean data existed for the true June 2019 observation window — see
+`main_actual_data_pipeline.ipynb`'s own Section 2). This entry documents a full pipeline
+rerun for the corrected event, NOT a redesign of any algorithm/equation/weight/clustering
+parameter — every T05/T06/T09/T29-T39 formula is reused byte-for-byte unchanged.
+
+### Files added
+
+- `notebooks/T_june2019_stage3_run.ipynb` — Stage III backward transport for the June 2019
+  event (T07 adapt, crop+load the new `ocean.nc`, `ForcingEnsemble`/`K`/`run_ensemble`,
+  save particle history). New file layout differences from the new `ocean.nc` (confirmed
+  by direct inspection, not assumed): dims renamed `latitude`/`longitude` → `lat`/`lon`;
+  time axis `2019-06-07T00:30` .. `2019-06-14T23:30` (192 hourly steps, 30-minute-offset
+  "hourly-mean-centered-at-time" convention, unlike the October file's on-the-hour steps);
+  grid `380×1016` covering nearly the whole Mediterranean (`lat 30.19..45.98`,
+  `lon -6.0..36.29`), vs. the October file's regional `149×216` extent.
+- `notebooks/T_june2019_phase3_pipeline.ipynb` — regenerates T17 candidates, T36 composite
+  scores, T37 clusters, T38 uncertainty/bootstrap, and a T39-style old-vs-new comparison +
+  visualization, all against the NEW June particle history — reusing
+  `iste.phase3_composite.compute_source_scores_for_candidates`,
+  `iste.phase3_clustering.cluster_candidates`, `iste.phase3_uncertainty.{run_bootstrap_
+  stability,compute_cluster_uncertainty_table}` unchanged (identical `DEFAULT_WEIGHTS`,
+  `DEFAULT_EPS_M`, bootstrap config to the October runs).
+- `result/` (new top-level output directory, separate from `results/actual_data/`):
+  `ocean_june2019_region.nc` (a REGIONAL CROP of the new `ocean.nc` — see below),
+  `stage3_particle_history_june2019.npz`, `stage3_history_summary_june2019.txt`,
+  `june2019_cluster_table.csv`, `june2019_old_vs_new_ranking.csv`,
+  `june2019_run_summary.json`, `june2019_selected_snapshots.png`, `june2019_final_map.png`.
+
+### Regional crop (data-practicality step, not an algorithm change)
+
+The new `ocean.nc`'s `380×1016` grid spans nearly the whole Mediterranean — far larger
+than any region relevant to this one spill's 72h drift, and loading it in full (~2.4 GB as
+float64×2 vars) was a genuine memory risk on this machine (as little as ~490 MB free RAM
+was observed mid-session). The Stage III notebook crops `ocean.nc` to the EXACT SAME
+regional bounding box the ORIGINAL October `ocean.nc` already used (`lat 30.15..36.40`,
+`lon 27.05..36.15` — reused, not newly invented, and already known to comfortably contain
+this spill's location plus 72h of drift), writes it to `result/ocean_june2019_region.nc`,
+then calls T01's own unmodified `load_field_dataset` on the cropped file — no loader code
+or physical equation was touched. The cropped grid is `150×218`, almost identical in size
+to the original October `149×216` grid.
+
+### Manual check (real data)
+
+**Stage III (`T_june2019_stage3_run.ipynb`):**
+
+```text
+T0  (t_obs) = 2019-06-14T20:35:58
+T72         = 2019-06-11T20:35:58
+ocean.nc covers the full [T72, T0] window: True (margin before T72: 116.10h; margin after T0: 2.90h)
+T07 adapted 548 real particles
+Running Stage III backward transport: 548 particles x 6 members x 72 steps (3.0 days) ...
+done in 763.1s (12.7 min) -> 240024 (particle, member, checkpoint) rows
+n_timestamps (checkpoints): 73; valid rows per checkpoint: 3288/3288 at every single one
+  of the 73 checkpoints (100% valid throughout the whole 72h window)
+```
+
+All 7 Stage III validation checks passed: 73 distinct checkpoints, `T0`/`T72` exact,
+1-hour spacing throughout, zero October timestamps in the new history, record count
+matches `548×6×73`, `DT_SECONDS`/`N_STEPS`/seeds unchanged from the original run.
+
+**Phase 3 (`T_june2019_phase3_pipeline.ipynb`):**
+
+```text
+loaded 240024 June-2019 real rows; full analysis grid has 73 timestamps
+regenerated 271 June-2019 real candidates in 80.4s; pooled 236736 valid particle positions
+computed T36 scores + T37 clusters (4 clusters) in 49.5s
+computed T38 uncertainty for 4 clusters (bootstrap runtime 4.09s)
+
+cluster_id  n_members  spatial_radius_km  uncertainty_radius_km  n_distinct_timestamps  candidate_stability_percent
+cluster0000        267             29.558                 30.073                     72                        100.0
+cluster0003          1              0.000                  0.919                      1                          0.0
+cluster0002          2              0.866                  0.677                      2                          0.0
+cluster0001          1              0.000                  0.981                      1                          0.0
+```
+
+All 6 Phase 3 validation checks passed (73 timestamps, exact `T0`/`T72`, zero October
+timestamps, every candidate accounted for exactly once, AIS reported `"unavailable"`).
+
+**Old-vs-new comparison (June event):** 0/10 overlap between the raw-`support_score`
+top-10 and the T36 `source_score` top-10 — the SAME qualitative pattern the October run
+showed (T29's per-timestamp normalization genuinely re-ranks candidates, not merely
+rescales them), now confirmed independently on a physically-correct June 2019 currents
+run: old `rank=1` (`2019-06-14T19:35:58`, `support_score=4735.7`, `T0-1h`) drops to
+`new_rank=72`; new `rank=1` (`2019-06-12T04:35:58`, `source_score=1.1931`, `T0-64h`) is
+part of the same kind of dominant multi-hour cluster (`cluster0000`, 267/271 candidates)
+already seen structurally in the October run.
+
+### Known limitations / findings from this rerun
+
+- `data/wind.nc` is NOT read by Stage III on this run either — per the pre-existing,
+  unmodified T01.5 decision (`iste/forcing_ensemble.py`'s own docstring: "this module
+  never reads `data/wind.nc`"), only `ocean.nc`'s `uo`/`vo` drive `U` and the stochastic
+  forcing ensemble. The new `wind.nc` was still verified to cover the correct June 2019
+  window (for future use), but its replacement had no computational effect on this rerun.
+- The new `ocean.nc`'s full (uncropped) grid is ~90% native NaN (`66,727,992` of
+  `74,127,360` cells in `uo`) — the product's real data footprint is far smaller than its
+  nominal `380×1016` bounding rectangle. The CROPPED region actually used for Stage III
+  had 100% valid particles at all 73 checkpoints — no NaN/invalid-domain issue was
+  encountered by any real particle trajectory in this run.
+- `ocean.nc`'s new time axis is offset 30 minutes from `wind.nc`'s (hourly-mean-centered-
+  at-time vs. on-the-hour) — cosmetic only, since `wind.nc` is unused; documented in
+  `tests/test_environment.py`'s updated `test_time_covers_same_window_as_ocean_file`.
+- T00-T13/T17-T26's own historical manual-check notebooks (run against the October data at
+  the time) are left untouched — only what T27-T39 actually needs was rerun, per the
+  task's own explicit scope ("reuse the existing T27-T39 implementation exactly").
+- `results/actual_data/` (the October outputs, including `stage3_particle_history.npz`)
+  was confirmed byte-identical/untouched (file mtime unchanged) after this rerun.
+
+### Test suite updates (required — the real `data/ocean.nc`/`data/wind.nc` files changed)
+
+5 test files directly load the real `data/ocean.nc`/`data/wind.nc` files by path
+(`test_derivatives.py`, `test_ensemble_run.py`, `test_environment.py`,
+`test_interpolation.py`, `test_stage3_validation.py`) and had hardcoded facts about the
+OLD October file (dim names `latitude`/`longitude`, shape `(336,149,216)`, time range,
+`missing_count`). These are DATA-FACT fixtures re-verified directly against the new real
+files (not assumptions, not algorithm changes) — same treatment as the notebook's own
+`OCEAN_PATH` dim-name update:
+  - `lat_dim`/`lon_dim` for `ocean.nc` calls: `"latitude"/"longitude"` → `"lat"/"lon"`
+    (`wind.nc` calls are unchanged — it still genuinely uses `"latitude"/"longitude"`).
+  - `test_environment.py`'s exact shape/time-range/`missing_count` values updated to the
+    new file's own re-verified numbers (`(192,380,1016)`; `2019-06-07T00:30`..
+    `2019-06-14T23:30`; `missing_count("uo")=66,727,992`, `wind` shape `(192,25,36)`).
+  - `test_time_matches_ocean_file` renamed `test_time_covers_same_window_as_ocean_file`
+    and rewritten to check window/resolution match plus the new, real 30-minute offset,
+    instead of exact equality (which no longer holds for the new files).
+  - All other real-data-dependent assertions (hand-computed derivative/interpolation spot
+    checks at dynamically-located or previously-verified-still-valid points) needed only
+    the dim-name fix; verified individually against the new files.
+- Full suite: **711/711 passed** (`python -m unittest discover -s tests`, 53.1s).
+
 ## Token/complexity rule
 
 Keep implementation compact. One task per Claude Code turn. Stage III is signed off; Stage

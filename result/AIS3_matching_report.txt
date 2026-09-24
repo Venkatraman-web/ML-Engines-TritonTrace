@@ -1,0 +1,35 @@
+TASK AIS-3 -- vessel-candidate matching report
+event window: T72=2019-06-11 20:35:58+00:00 .. T0=2019-06-14 20:35:58+00:00
+
+number of vessels considered (AIS-2 event-window+AOI dataset): 264
+number of Phase 3 candidate timestamps: 72
+number of Phase 3 candidates (all timestamps): 271
+number of vessel-candidate comparisons (pairs within +/-2.0h): 185366
+
+TIMESTAMP ALIGNMENT:
+  candidate timestamps: 72 distinct
+  AIS timestamps: 73 distinct
+  AIS timestamps exactly on the candidate grid: 72 (98.6%)
+  median |AIS - nearest candidate timestamp|: 0.0s
+
+MATCHING TOLERANCE DEFINITIONS (explicit, configurable -- diagnostic, not ranking rules):
+  exact    : |time_diff| <= 1.0 second (floating-point safety margin only)
+  +/-1h    : |time_diff| <= 1.0 hour
+  +/-2h    : |time_diff| <= 2.0 hours (widest tolerance actually computed)
+  pairs satisfying exact   : 37819
+  pairs satisfying +/-1h   : 112119
+  pairs satisfying +/-2h   : 185366
+
+DISTANCE DISTRIBUTION (km, great-circle/Haversine):
+  median=361.99  p90=653.57  p95=694.98  p99=733.37
+  pairs with distance <= 1 km: 3
+  pairs with distance <= 2 km: 7
+  pairs with distance <= 5 km: 17
+  pairs with distance <= 10 km: 62
+
+DATA-COVERAGE LIMITATIONS:
+  - candidates exist at 72 of the 73 T0-T72 analysis timestamps (T0 itself 
+    produced no separate T17 peak in the underlying real-data pipeline; unaffected by this task).
+  - 0 of 264 vessels have ZERO matches within +/-2h 
+    of any candidate timestamp (their AIS observations simply do not fall near any candidate time).
+  - no AIS position was ever interpolated; every matched AIS row is a real, already-recorded observation.

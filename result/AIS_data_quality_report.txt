@@ -1,0 +1,40 @@
+TASK AIS-2 -- AIS data quality report (full dataset)
+source file: C:\Users\venka\OneDrive\Desktop\SIH-2026\project-v5\east_med_massive_random_ais.csv
+
+n_rows                      : 124887
+n_unique_mmsi               : 2003
+n_unique_imo                : 2001
+n_unique_vessel_name        : 2000
+timestamp range             : 2019-01-10 17:05:00+00:00 .. 2019-12-17 07:11:39+00:00
+n_duplicate_rows            : 0
+n_duplicate_mmsi_timestamp  : 0
+n_invalid_lat               : 0
+n_invalid_lon               : 0
+n_zero_zero_coords          : 0
+n MMSI with >1 distinct vessel_name: 0
+n MMSI with >1 distinct imo        : 0
+
+missing value counts per column:
+  mmsi           : 0
+  timestamp      : 0
+  lat            : 0
+  lon            : 0
+  sog            : 0
+  cog            : 0
+  vessel_name    : 0
+  imo            : 0
+  vessel_type    : 0
+  type_code      : 0
+  length         : 0
+  width          : 0
+  draught        : 0
+
+vessel_type distribution (full dataset):
+  Chemical Tanker               : 16857
+  LNG Carrier                   : 16625
+  Product Tanker                : 16553
+  General Cargo                 : 16056
+  Fishing                       : 15889
+  Crude Oil Tanker              : 15306
+  Bulk Carrier                  : 14503
+  Container Ship                : 13098

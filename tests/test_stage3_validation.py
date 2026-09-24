@@ -413,7 +413,7 @@ class TestRealDataSanityCheck(unittest.TestCase):
 
     def test_small_real_run_produces_finite_sane_diagnostics(self):
         ocean = load_field_dataset(
-            "data/ocean.nc", ["uo", "vo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            "data/ocean.nc", ["uo", "vo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
         t0 = ocean.time[50]
         particles = adapt_upstream_particles(

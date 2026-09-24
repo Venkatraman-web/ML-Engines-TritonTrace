@@ -1,0 +1,17 @@
+{
+  "image_filename": "ow-0008.jpg",
+  "mask_filename": "mask_ow-0008.png",
+  "true_timestamp": "2019-06-14T20:35:58",
+  "area_pixels": "17712",
+  "bounding_box": {
+    "upper_left": {
+      "lat": 34.007546490362,
+      "lon": 35.2080834959405
+    },
+    "bottom_right": {
+      "lat": 34.1424457731161,
+      "lon": 35.3200266767827
+    }
+  },
+  "total_parcels": 548
+}

@@ -1,0 +1,11 @@
+{
+  "event": "June 2019 (ow-0008.jpg)",
+  "t_obs": "2019-06-14T20:35:58.000000000",
+  "t72": "2019-06-11T20:35:58.000000000",
+  "n_particles": 548,
+  "n_forcing_members": 6,
+  "n_records": 240024,
+  "n_candidates": 271,
+  "n_clusters": 4,
+  "top10_overlap_old_vs_new": 0
+}

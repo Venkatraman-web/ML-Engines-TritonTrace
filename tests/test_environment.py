@@ -28,23 +28,30 @@ class TestLoadOceanDataset(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.src = load_field_dataset(
-            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
 
     def test_shape_and_timestamp_count(self):
-        self.assertEqual(self.src.data["uo"].shape, (336, 149, 216))
-        self.assertEqual(len(self.src.time), 336)
+        # June-2019 event-correction rerun (2026-09-24): data/ocean.nc was replaced with
+        # real June 2019 currents (dims renamed latitude/longitude -> lat/lon, a much
+        # larger regional extent, 192 hourly steps instead of 336). These are facts about
+        # the current real file, re-verified directly against it, not assumed.
+        self.assertEqual(self.src.data["uo"].shape, (192, 380, 1016))
+        self.assertEqual(len(self.src.time), 192)
 
     def test_time_range(self):
-        self.assertEqual(str(self.src.time[0])[:19], "2019-10-01T00:00:00")
-        self.assertEqual(str(self.src.time[-1])[:19], "2019-10-14T23:00:00")
+        self.assertEqual(str(self.src.time[0])[:19], "2019-06-07T00:30:00")
+        self.assertEqual(str(self.src.time[-1])[:19], "2019-06-14T23:30:00")
 
     def test_latitude_ascending(self):
         self.assertTrue(self.src.lat_ascending)
 
     def test_missing_count_matches_t00_finding(self):
-        # T00 inspection found 2,974,608 / 10,813,824 NaN cells in uo after masking |x| >= 1e19.
-        self.assertEqual(self.src.missing_count("uo"), 2_974_608)
+        # Re-verified directly against the current (June-2019) data/ocean.nc: this file's
+        # grid spans nearly the whole Mediterranean (lat 30.19..45.98, lon -6.0..36.29),
+        # far beyond the product's actual data footprint/coastline, so the large majority
+        # of cells are native NaN (land or out-of-domain), not |x| >= 1e19 sentinel fills.
+        self.assertEqual(self.src.missing_count("uo"), 66_727_992)
 
     def test_describe_table_is_non_empty_and_mentions_variables(self):
         table = self.src.describe().as_table()
@@ -63,8 +70,11 @@ class TestLoadWindDataset(unittest.TestCase):
         )
 
     def test_shape_and_timestamp_count(self):
-        self.assertEqual(self.src.data["u10"].shape, (336, 25, 36))
-        self.assertEqual(len(self.src.time), 336)
+        # June-2019 event-correction rerun (2026-09-24): data/wind.nc was replaced with
+        # real June 2019 winds -- same dim names/grid size as before, 192 hourly steps
+        # instead of 336 (re-verified directly against the current file).
+        self.assertEqual(self.src.data["u10"].shape, (192, 25, 36))
+        self.assertEqual(len(self.src.time), 192)
 
     def test_latitude_descending(self):
         self.assertFalse(self.src.lat_ascending)
@@ -73,11 +83,21 @@ class TestLoadWindDataset(unittest.TestCase):
         self.assertEqual(self.src.missing_count("u10"), 0)
         self.assertEqual(self.src.missing_count("v10"), 0)
 
-    def test_time_matches_ocean_file(self):
+    def test_time_covers_same_window_as_ocean_file(self):
+        # June-2019 event-correction rerun (2026-09-24): unlike the October files (which
+        # shared identical on-the-hour timestamps), the new ocean.nc is an hourly-MEAN-
+        # centered-at-time product offset 30 minutes from wind.nc's on-the-hour
+        # valid_time -- re-verified directly against both current files, not assumed to
+        # still be exactly equal. This does not affect Stage III (T01.5: wind.nc is never
+        # read for U/forcing). Both cover the same calendar window at 1-hour resolution.
         ocean = load_field_dataset(
-            OCEAN_PATH, ["uo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            OCEAN_PATH, ["uo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
-        self.assertTrue(np.array_equal(self.src.time, ocean.time))
+        self.assertEqual(len(self.src.time), len(ocean.time))
+        self.assertEqual(str(self.src.time[0])[:10], str(ocean.time[0])[:10])
+        self.assertEqual(str(self.src.time[-1])[:10], str(ocean.time[-1])[:10])
+        offset = (ocean.time[0] - self.src.time[0]) / np.timedelta64(1, "m")
+        self.assertEqual(offset, 30.0)
 
 
 class TestLoaderIsLayoutAgnostic(unittest.TestCase):

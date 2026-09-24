@@ -1,0 +1,13 @@
+TASK AIS-2 -- AIS event-window summary
+event window: T72=2019-06-11 20:35:58+00:00 .. T0=2019-06-14 20:35:58+00:00
+project AOI: N=36.372 W=27.121 S=30.1875 E=36.088
+
+vessels with >=1 AIS position inside the event window (before AOI filter): 266
+vessels entering the AOI during the event window: 264
+AIS observations in event window + AOI: 10150
+usable tracks (>=2 observations, displacement computable): 261
+single-observation tracks (no track structure possible): 3
+tracks with >=1 gap exceeding 6.0h: 1
+flagged implausible positional jumps (>60.0 knots implied speed): 0
+duplicate (mmsi, timestamp) records in FULL dataset: 0
+invalid lat/lon in FULL dataset: 0 / 0

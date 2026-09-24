@@ -1,0 +1,45 @@
+TASK AIS-5 -- AIS vessel ranking report
+
+ais_attribution_score is an EVIDENCE-RANKING score for comparing vessels within one run/configuration. It is NOT a probability, confidence, likelihood, or certainty that any vessel caused or is the source of the spill. A high score is evidence of closer/more sustained spatial-temporal synchronization with the backtracked candidate corridor, nothing more. This is an AIS EVIDENCE RANKING, not a source attribution conclusion -- no vessel is or should be identified as the source based on this score alone.
+
+vessels considered: 264
+vessels with a defined ais_attribution_score (>=1 exact close/far encounter measurable): 262
+
+DEFAULT_WEIGHTS: {'spatial': 0.35, 'temporal_consecutive': 0.2, 'temporal_coverage': 0.2, 'support': 0.25, 'null': 0.0}
+DEFAULT_SPATIAL_SCALE_KM: 10.0 (reused from AIS-3/4's own close-encounter definition)
+
+TOP-RANKED VESSEL (evidence ranking only, NOT a source identification):
+  rank=1  mmsi=211317341  vessel_name=MV NAVIGATOR F26  vessel_type=LNG Carrier
+  ais_attribution_score=0.5719
+  spatial_evidence=0.9108189042640522  temporal_consecutive_evidence=0.027777777777777776
+  temporal_coverage_evidence=0.027777777777777776  support_evidence=0.9678955604348772
+  strongest_encounter: 2019-06-14 04:35:58+00:00, distance=0.934km, candidate=2019-06-14T04:35:58_cand000
+
+EVIDENCE CONCENTRATION (item 11):
+  n_vessels_with_score: 262
+  total_score_mass: 3.380148357416742
+  top_5_share_of_total_score: 0.49724746521649454
+  top_10_share_of_total_score: 0.7595581454279693
+  top_20_share_of_total_score: 0.9326519899920532
+  top_50_share_of_total_score: 0.9994238159141341
+  gini_coefficient: 0.9454772341454272
+
+SENSITIVITY ANALYSIS (item 7) -- top-10 overlap with primary (default, exact) ranking:
+  default                top1_mmsi=211317341  overlap=10/10  spearman=+1.0000
+  equal_weights          top1_mmsi=211317341  overlap=10/10  spearman=+1.0000
+  spatial_emphasis       top1_mmsi=211317341  overlap=10/10  spearman=+1.0000
+  temporal_emphasis      top1_mmsi=211317341  overlap=10/10  spearman=+1.0000
+  null_sensitivity       top1_mmsi=211317341  overlap=3/10  spearman=-0.0849
+  within_1h              top1_mmsi=211317341  overlap=10/10  spearman=+0.9998
+  within_2h              top1_mmsi=211317341  overlap=10/10  spearman=+0.9998
+  spatial_scale_5km      top1_mmsi=211317341  overlap=10/10  spearman=+1.0000
+  spatial_scale_20km     top1_mmsi=211317341  overlap=8/10  spearman=+1.0000
+
+VALIDATION:
+  - scoring is fully reproducible (deterministic formula, no randomness)
+  - no Stage III/T27-T39/T35/T36 calculation was changed
+  - vessel_type never enters the score (Section 7 above)
+  - no observation-count bias (AIS-4's own count-normalized fractions reused)
+  - exact/+/-1h/+/-2h evidence kept as separate sensitivity configurations, primary basis is exact
+  - null diagnostic p-value has weight 0 in the primary score; only NULL_SENSITIVITY_WEIGHTS exercises it
+  - no probability/certainty claim made anywhere in this report

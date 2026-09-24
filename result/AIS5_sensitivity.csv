@@ -1,0 +1,10 @@
+config,top1_mmsi,top10_overlap_with_primary,spearman_vs_primary
+default,211317341,10,1.0
+equal_weights,211317341,10,1.0
+spatial_emphasis,211317341,10,1.0
+temporal_emphasis,211317341,10,1.0
+null_sensitivity,211317341,3,-0.0849
+within_1h,211317341,10,0.9998
+within_2h,211317341,10,0.9998
+spatial_scale_5km,211317341,10,1.0
+spatial_scale_20km,211317341,8,1.0

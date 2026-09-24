@@ -1,0 +1,5 @@
+config,top1_candidate,top10_overlap_vs_default_ais,spearman_vs_default_ais
+w_ais=0.10,2019-06-12T04:35:58_cand000,10.0,0.9942
+w_ais=0.20 (default),2019-06-12T04:35:58_cand000,10.0,1.0
+w_ais=0.30,2019-06-12T04:35:58_cand000,9.0,0.9998
+ais_query_window=single_instant (n_available=17),,,

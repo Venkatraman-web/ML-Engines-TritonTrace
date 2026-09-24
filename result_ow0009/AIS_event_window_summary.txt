@@ -1,0 +1,11 @@
+ow-0009 (April 2019) -- AIS event-window summary
+event window: T72=2019-04-25 15:38:41+00:00 .. T0=2019-04-28 15:38:41+00:00
+project AOI: N=36.372 W=27.121 S=30.1875 E=36.088
+
+vessels with >=1 AIS position inside the event window (before AOI filter): 218
+vessels entering the AOI during the event window: 217
+AIS observations in event window + AOI: 8017
+usable tracks (>=2 observations): 213
+single-observation tracks: 4
+tracks with >=1 gap exceeding 6.0h: 0
+flagged implausible positional jumps: 0

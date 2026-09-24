@@ -169,7 +169,7 @@ class TestDivergenceRealDataSanityCheck(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.ocean = load_field_dataset(
-            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
 
     def test_matches_manual_finite_difference_at_one_real_point(self):

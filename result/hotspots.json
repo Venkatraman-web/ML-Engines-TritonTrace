@@ -1,0 +1,2712 @@
+[
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand000",
+    "lat": 34.38254649036202,
+    "lon": 35.00046205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 931.249119491614,
+    "density_score": 315.0,
+    "weighted_support_score": 363.249119491614,
+    "pixel_diversity_score": 253.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand001",
+    "lat": 34.343546490362016,
+    "lon": 35.00946205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 350.55725296528436,
+    "density_score": 110.0,
+    "weighted_support_score": 131.55725296528436,
+    "pixel_diversity_score": 109.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand002",
+    "lat": 34.40954649036202,
+    "lon": 35.07246205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 15.878825952102435,
+    "density_score": 5.0,
+    "weighted_support_score": 5.878825952102435,
+    "pixel_diversity_score": 5.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand003",
+    "lat": 34.40654649036202,
+    "lon": 34.92246205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 8.955677025372248,
+    "density_score": 3.0,
+    "weighted_support_score": 2.9556770253722475,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand004",
+    "lat": 34.349546490362016,
+    "lon": 35.09046205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 6.528348828226342,
+    "density_score": 2.0,
+    "weighted_support_score": 2.5283488282263424,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand005",
+    "lat": 34.42754649036202,
+    "lon": 35.06646205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 3.2209704863604047,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2209704863604047,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand006",
+    "lat": 34.40354649036202,
+    "lon": 35.102462057763184,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 3.163655285884818,
+    "density_score": 1.0,
+    "weighted_support_score": 1.163655285884818,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand007",
+    "lat": 34.355546490362016,
+    "lon": 34.91646205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 3.0149698184690568,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0149698184690565,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand008",
+    "lat": 34.44254649036202,
+    "lon": 34.96146205776318,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 3.011874121021598,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0118741210215976,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T20:35:58_cand009",
+    "lat": 34.39454649036202,
+    "lon": 34.910462057763176,
+    "t_s": "2019-06-11T20:35:58",
+    "support_score": 2.9683448648080244,
+    "density_score": 1.0,
+    "weighted_support_score": 0.9683448648080246,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand000",
+    "lat": 34.37654649036202,
+    "lon": 35.00646205776318,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 953.8566253482363,
+    "density_score": 318.0,
+    "weighted_support_score": 378.85662534823626,
+    "pixel_diversity_score": 257.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand001",
+    "lat": 34.343546490362016,
+    "lon": 35.00646205776318,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 341.0776861543926,
+    "density_score": 106.0,
+    "weighted_support_score": 129.0776861543926,
+    "pixel_diversity_score": 106.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand002",
+    "lat": 34.346546490362016,
+    "lon": 35.08446205776318,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 9.870449776846575,
+    "density_score": 3.0,
+    "weighted_support_score": 3.870449776846575,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand003",
+    "lat": 34.42754649036202,
+    "lon": 35.05146205776318,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 3.2411157821295595,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2411157821295595,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand004",
+    "lat": 34.40354649036202,
+    "lon": 35.09646205776318,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 3.179990409921893,
+    "density_score": 1.0,
+    "weighted_support_score": 1.179990409921893,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand005",
+    "lat": 34.355546490362016,
+    "lon": 34.91946205776318,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 3.020051341785249,
+    "density_score": 1.0,
+    "weighted_support_score": 1.020051341785249,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T21:35:58_cand006",
+    "lat": 34.39454649036202,
+    "lon": 34.910462057763176,
+    "t_s": "2019-06-11T21:35:58",
+    "support_score": 2.978861634110458,
+    "density_score": 1.0,
+    "weighted_support_score": 0.9788616341104581,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand000",
+    "lat": 34.37654649036202,
+    "lon": 35.00646205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 971.8518988772723,
+    "density_score": 324.0,
+    "weighted_support_score": 390.8518988772724,
+    "pixel_diversity_score": 257.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand001",
+    "lat": 34.343546490362016,
+    "lon": 35.00946205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 346.92827908237985,
+    "density_score": 107.0,
+    "weighted_support_score": 132.92827908237987,
+    "pixel_diversity_score": 107.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand002",
+    "lat": 34.346546490362016,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 9.946072818904225,
+    "density_score": 3.0,
+    "weighted_support_score": 3.946072818904225,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand003",
+    "lat": 34.36454649036202,
+    "lon": 34.92546205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 6.0455162770248165,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0455162770248165,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand004",
+    "lat": 34.346546490362016,
+    "lon": 35.105462057763184,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 3.3372668364429634,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3372668364429632,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand005",
+    "lat": 34.42454649036202,
+    "lon": 35.06946205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 3.253029311660013,
+    "density_score": 1.0,
+    "weighted_support_score": 1.253029311660013,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand006",
+    "lat": 34.41554649036202,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 3.2044432796839137,
+    "density_score": 1.0,
+    "weighted_support_score": 1.204443279683914,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand007",
+    "lat": 34.39454649036202,
+    "lon": 35.111462057763184,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 3.1890129156629197,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1890129156629197,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand008",
+    "lat": 34.40054649036202,
+    "lon": 35.09646205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 3.1890129156629197,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1890129156629197,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T22:35:58_cand009",
+    "lat": 34.39754649036202,
+    "lon": 34.91346205776318,
+    "t_s": "2019-06-11T22:35:58",
+    "support_score": 2.990263048811636,
+    "density_score": 1.0,
+    "weighted_support_score": 0.9902630488116364,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand000",
+    "lat": 34.37654649036202,
+    "lon": 35.01246205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 966.5827916949611,
+    "density_score": 317.0,
+    "weighted_support_score": 387.5827916949611,
+    "pixel_diversity_score": 262.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand001",
+    "lat": 34.343546490362016,
+    "lon": 35.01546205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 345.90389403332955,
+    "density_score": 106.0,
+    "weighted_support_score": 133.90389403332955,
+    "pixel_diversity_score": 106.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand002",
+    "lat": 34.346546490362016,
+    "lon": 35.09046205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 13.27656145877096,
+    "density_score": 4.0,
+    "weighted_support_score": 5.276561458770959,
+    "pixel_diversity_score": 4.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand003",
+    "lat": 34.43354649036202,
+    "lon": 34.97646205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 9.178966991274283,
+    "density_score": 3.0,
+    "weighted_support_score": 3.178966991274283,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand004",
+    "lat": 34.36454649036202,
+    "lon": 34.92846205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 6.05617156292064,
+    "density_score": 2.0,
+    "weighted_support_score": 2.05617156292064,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand005",
+    "lat": 34.346546490362016,
+    "lon": 35.108462057763184,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 3.3428313630553554,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3428313630553554,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand006",
+    "lat": 34.42454649036202,
+    "lon": 35.05746205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 3.257115712230532,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2571157122305323,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand007",
+    "lat": 34.41554649036202,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 3.208040319799375,
+    "density_score": 1.0,
+    "weighted_support_score": 1.208040319799375,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand008",
+    "lat": 34.39154649036202,
+    "lon": 35.117462057763184,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 3.188113151550387,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1881131515503867,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand009",
+    "lat": 34.39754649036202,
+    "lon": 35.102462057763184,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 3.188113151550387,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1881131515503867,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-11T23:35:58_cand010",
+    "lat": 34.39154649036202,
+    "lon": 34.91946205776318,
+    "t_s": "2019-06-11T23:35:58",
+    "support_score": 2.998074820401189,
+    "density_score": 1.0,
+    "weighted_support_score": 0.9980748204011892,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand000",
+    "lat": 34.37954649036202,
+    "lon": 35.02446205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 987.5485920890987,
+    "density_score": 328.0,
+    "weighted_support_score": 406.5485920890988,
+    "pixel_diversity_score": 253.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand001",
+    "lat": 34.343546490362016,
+    "lon": 35.01546205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 336.0683301889836,
+    "density_score": 103.0,
+    "weighted_support_score": 130.06833018898362,
+    "pixel_diversity_score": 103.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand002",
+    "lat": 34.343546490362016,
+    "lon": 35.03646205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 299.2458926137812,
+    "density_score": 91.0,
+    "weighted_support_score": 118.24589261378124,
+    "pixel_diversity_score": 90.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand003",
+    "lat": 34.337546490362016,
+    "lon": 35.102462057763184,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 6.640425194694212,
+    "density_score": 2.0,
+    "weighted_support_score": 2.6404251946942123,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand004",
+    "lat": 34.328546490362015,
+    "lon": 34.95546205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 6.265888291273333,
+    "density_score": 2.0,
+    "weighted_support_score": 2.265888291273333,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand005",
+    "lat": 34.36454649036202,
+    "lon": 34.92846205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 6.0637695434025085,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0637695434025085,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand006",
+    "lat": 34.343546490362016,
+    "lon": 35.117462057763184,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 3.3276903477753685,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3276903477753685,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand007",
+    "lat": 34.42154649036202,
+    "lon": 35.07846205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 3.253641849970583,
+    "density_score": 1.0,
+    "weighted_support_score": 1.253641849970583,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand008",
+    "lat": 34.40654649036202,
+    "lon": 35.102462057763184,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 3.2016805958319186,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2016805958319186,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand009",
+    "lat": 34.39154649036202,
+    "lon": 35.120462057763184,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 3.1771157037467272,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1771157037467275,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T00:35:58_cand010",
+    "lat": 34.39154649036202,
+    "lon": 34.92846205776318,
+    "t_s": "2019-06-12T00:35:58",
+    "support_score": 3.0029328073023187,
+    "density_score": 1.0,
+    "weighted_support_score": 1.002932807302319,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand000",
+    "lat": 34.37654649036202,
+    "lon": 35.02446205776318,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 1022.746330269628,
+    "density_score": 337.0,
+    "weighted_support_score": 417.74633026962795,
+    "pixel_diversity_score": 268.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand001",
+    "lat": 34.340546490362016,
+    "lon": 35.02746205776318,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 320.9595857631617,
+    "density_score": 98.0,
+    "weighted_support_score": 124.95958576316171,
+    "pixel_diversity_score": 98.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand002",
+    "lat": 34.340546490362016,
+    "lon": 35.111462057763184,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 6.583884699128477,
+    "density_score": 2.0,
+    "weighted_support_score": 2.583884699128477,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand003",
+    "lat": 34.36754649036202,
+    "lon": 34.93446205776318,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 6.067560486854,
+    "density_score": 2.0,
+    "weighted_support_score": 2.067560486854,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand004",
+    "lat": 34.42154649036202,
+    "lon": 35.08146205776318,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 3.2422256871239936,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2422256871239938,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand005",
+    "lat": 34.40054649036202,
+    "lon": 35.108462057763184,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 3.187125500669059,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1871255006690593,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand006",
+    "lat": 34.38854649036202,
+    "lon": 35.126462057763185,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 3.155750754632087,
+    "density_score": 1.0,
+    "weighted_support_score": 1.155750754632087,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T01:35:58_cand007",
+    "lat": 34.39154649036202,
+    "lon": 34.93446205776318,
+    "t_s": "2019-06-12T01:35:58",
+    "support_score": 3.0054566428521516,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0054566428521516,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand000",
+    "lat": 34.37654649036202,
+    "lon": 35.03346205776318,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 1074.1755402966828,
+    "density_score": 356.0,
+    "weighted_support_score": 440.1755402966827,
+    "pixel_diversity_score": 278.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand001",
+    "lat": 34.340546490362016,
+    "lon": 35.03346205776318,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 312.63814460966773,
+    "density_score": 96.0,
+    "weighted_support_score": 120.6381446096677,
+    "pixel_diversity_score": 96.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand002",
+    "lat": 34.337546490362016,
+    "lon": 35.105462057763184,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 13.021070842528486,
+    "density_score": 4.0,
+    "weighted_support_score": 5.021070842528486,
+    "pixel_diversity_score": 4.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand003",
+    "lat": 34.37054649036202,
+    "lon": 34.94046205776318,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 6.069239345403392,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0692393454033917,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand004",
+    "lat": 34.41854649036202,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 3.222370841443132,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2223708414431316,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand005",
+    "lat": 34.40354649036202,
+    "lon": 35.111462057763184,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 3.1663717999517735,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1663717999517735,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand006",
+    "lat": 34.38254649036202,
+    "lon": 35.132462057763185,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 3.1264797797988835,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1264797797988835,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand007",
+    "lat": 34.39154649036202,
+    "lon": 34.94346205776318,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 3.007608940565434,
+    "density_score": 1.0,
+    "weighted_support_score": 1.007608940565434,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T02:35:58_cand008",
+    "lat": 34.40654649036202,
+    "lon": 34.94046205776318,
+    "t_s": "2019-06-12T02:35:58",
+    "support_score": 3.007608940565434,
+    "density_score": 1.0,
+    "weighted_support_score": 1.007608940565434,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand000",
+    "lat": 34.37354649036202,
+    "lon": 35.04546205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 1067.5568878090587,
+    "density_score": 353.0,
+    "weighted_support_score": 432.55688780905865,
+    "pixel_diversity_score": 282.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand001",
+    "lat": 34.337546490362016,
+    "lon": 35.03646205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 318.7300861815111,
+    "density_score": 99.0,
+    "weighted_support_score": 120.73008618151113,
+    "pixel_diversity_score": 99.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand002",
+    "lat": 34.343546490362016,
+    "lon": 35.01246205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 259.7996645254709,
+    "density_score": 82.0,
+    "weighted_support_score": 95.79966452547092,
+    "pixel_diversity_score": 82.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand003",
+    "lat": 34.337546490362016,
+    "lon": 35.111462057763184,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 16.04245858706256,
+    "density_score": 5.0,
+    "weighted_support_score": 6.0424585870625585,
+    "pixel_diversity_score": 5.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand004",
+    "lat": 34.43354649036202,
+    "lon": 34.99446205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 6.1448801047912305,
+    "density_score": 2.0,
+    "weighted_support_score": 2.144880104791231,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand005",
+    "lat": 34.36454649036202,
+    "lon": 34.94646205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 6.0703408421268605,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0703408421268605,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand006",
+    "lat": 34.41254649036202,
+    "lon": 35.09646205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 3.1973096007222552,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1973096007222552,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand007",
+    "lat": 34.37654649036202,
+    "lon": 35.138462057763185,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 3.0965982354744854,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0965982354744852,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand008",
+    "lat": 34.38854649036202,
+    "lon": 35.129462057763185,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 3.0965982354744854,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0965982354744852,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand009",
+    "lat": 34.39154649036202,
+    "lon": 34.94646205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 3.0113130766075664,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0113130766075664,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T03:35:58_cand010",
+    "lat": 34.40654649036202,
+    "lon": 34.94646205776318,
+    "t_s": "2019-06-12T03:35:58",
+    "support_score": 3.0113130766075664,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0113130766075664,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand000",
+    "lat": 34.37354649036202,
+    "lon": 35.04846205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 1110.2424267338406,
+    "density_score": 374.0,
+    "weighted_support_score": 445.2424267338407,
+    "pixel_diversity_score": 291.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand001",
+    "lat": 34.337546490362016,
+    "lon": 35.04546205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 330.82910707810254,
+    "density_score": 104.0,
+    "weighted_support_score": 122.82910707810255,
+    "pixel_diversity_score": 104.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand002",
+    "lat": 34.358546490362016,
+    "lon": 34.95546205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 6.069245818364237,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0692458183642373,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand003",
+    "lat": 34.40954649036202,
+    "lon": 35.09646205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 3.1682230078423705,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1682230078423705,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand004",
+    "lat": 34.43054649036202,
+    "lon": 35.01546205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 3.0841311170244996,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0841311170244996,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand005",
+    "lat": 34.37354649036202,
+    "lon": 35.144462057763185,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 3.069022613125263,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0690226131252627,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand006",
+    "lat": 34.38854649036202,
+    "lon": 34.95846205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 3.0178198061778376,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0178198061778378,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T04:35:58_cand007",
+    "lat": 34.40054649036202,
+    "lon": 34.94946205776318,
+    "t_s": "2019-06-12T04:35:58",
+    "support_score": 3.0178198061778376,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0178198061778378,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand000",
+    "lat": 34.36754649036202,
+    "lon": 35.05746205776318,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 1113.3266919833236,
+    "density_score": 382.0,
+    "weighted_support_score": 440.3266919833235,
+    "pixel_diversity_score": 291.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand001",
+    "lat": 34.334546490362015,
+    "lon": 35.05146205776318,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 334.96807493598425,
+    "density_score": 107.0,
+    "weighted_support_score": 120.96807493598425,
+    "pixel_diversity_score": 107.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand002",
+    "lat": 34.352546490362016,
+    "lon": 34.97046205776318,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 9.12445600917281,
+    "density_score": 3.0,
+    "weighted_support_score": 3.1244560091728104,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand003",
+    "lat": 34.40354649036202,
+    "lon": 35.105462057763184,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 3.1379282108897493,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1379282108897493,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand004",
+    "lat": 34.42454649036202,
+    "lon": 35.02146205776318,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 3.0775271690928268,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0775271690928265,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand005",
+    "lat": 34.36754649036202,
+    "lon": 35.150462057763185,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 3.046416934393913,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0464169343939134,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand006",
+    "lat": 34.37654649036202,
+    "lon": 35.135462057763185,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 3.046416934393913,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0464169343939134,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T05:35:58_cand007",
+    "lat": 34.38854649036202,
+    "lon": 34.96146205776318,
+    "t_s": "2019-06-12T05:35:58",
+    "support_score": 3.0235172961200854,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0235172961200854,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand000",
+    "lat": 34.36454649036202,
+    "lon": 35.06346205776318,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 1159.4605158159793,
+    "density_score": 405.0,
+    "weighted_support_score": 449.46051581597925,
+    "pixel_diversity_score": 305.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand001",
+    "lat": 34.328546490362015,
+    "lon": 35.05746205776318,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 345.23100190086586,
+    "density_score": 112.0,
+    "weighted_support_score": 121.23100190086583,
+    "pixel_diversity_score": 112.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand002",
+    "lat": 34.352546490362016,
+    "lon": 34.97346205776318,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 6.03797727014314,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0379772701431396,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand003",
+    "lat": 34.40054649036202,
+    "lon": 35.102462057763184,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 3.1077301474227217,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1077301474227217,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand004",
+    "lat": 34.41854649036202,
+    "lon": 35.03046205776318,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 3.064922958017897,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0649229580178972,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand005",
+    "lat": 34.36154649036202,
+    "lon": 35.156462057763186,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 3.0315818357712128,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0315818357712128,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand006",
+    "lat": 34.37054649036202,
+    "lon": 35.141462057763185,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 3.0315818357712128,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0315818357712128,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand007",
+    "lat": 34.38254649036202,
+    "lon": 34.97346205776318,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 3.0243986995846917,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0243986995846917,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T06:35:58_cand008",
+    "lat": 34.39754649036202,
+    "lon": 34.97046205776318,
+    "t_s": "2019-06-12T06:35:58",
+    "support_score": 3.0243986995846917,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0243986995846917,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand000",
+    "lat": 34.358546490362016,
+    "lon": 35.06946205776318,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 1177.3364581704118,
+    "density_score": 417.0,
+    "weighted_support_score": 446.3364581704119,
+    "pixel_diversity_score": 314.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand001",
+    "lat": 34.325546490362015,
+    "lon": 35.06346205776318,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 359.01373472607315,
+    "density_score": 118.0,
+    "weighted_support_score": 123.01373472607315,
+    "pixel_diversity_score": 118.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand002",
+    "lat": 34.349546490362016,
+    "lon": 34.98246205776318,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 6.002075814781188,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0020758147811883,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand003",
+    "lat": 34.39154649036202,
+    "lon": 35.114462057763184,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 3.0837518468695633,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0837518468695633,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand004",
+    "lat": 34.41254649036202,
+    "lon": 35.03946205776318,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 3.0463953026965958,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0463953026965958,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand005",
+    "lat": 34.355546490362016,
+    "lon": 35.159462057763186,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 3.0266837730809613,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0266837730809615,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand006",
+    "lat": 34.36754649036202,
+    "lon": 35.147462057763185,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 3.0266837730809613,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0266837730809615,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand007",
+    "lat": 34.37954649036202,
+    "lon": 34.97946205776318,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 3.018534276972149,
+    "density_score": 1.0,
+    "weighted_support_score": 1.018534276972149,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T07:35:58_cand008",
+    "lat": 34.39454649036202,
+    "lon": 34.97646205776318,
+    "t_s": "2019-06-12T07:35:58",
+    "support_score": 3.018534276972149,
+    "density_score": 1.0,
+    "weighted_support_score": 1.018534276972149,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand000",
+    "lat": 34.355546490362016,
+    "lon": 35.07246205776318,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 1189.91897940532,
+    "density_score": 424.0,
+    "weighted_support_score": 440.9189794053201,
+    "pixel_diversity_score": 325.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand001",
+    "lat": 34.319546490362015,
+    "lon": 35.07546205776318,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 392.73615094940806,
+    "density_score": 130.0,
+    "weighted_support_score": 132.73615094940803,
+    "pixel_diversity_score": 130.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand002",
+    "lat": 34.343546490362016,
+    "lon": 34.99146205776318,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 5.960430297188064,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9604302971880638,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand003",
+    "lat": 34.38554649036202,
+    "lon": 35.117462057763184,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 3.0698238412694767,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0698238412694765,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand004",
+    "lat": 34.349546490362016,
+    "lon": 35.165462057763186,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 3.034499136798121,
+    "density_score": 1.0,
+    "weighted_support_score": 1.034499136798121,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand005",
+    "lat": 34.36154649036202,
+    "lon": 35.153462057763186,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 3.034499136798121,
+    "density_score": 1.0,
+    "weighted_support_score": 1.034499136798121,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand006",
+    "lat": 34.37654649036202,
+    "lon": 34.98546205776318,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 3.0050049660048743,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0050049660048743,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T08:35:58_cand007",
+    "lat": 34.39154649036202,
+    "lon": 34.98846205776318,
+    "t_s": "2019-06-12T08:35:58",
+    "support_score": 3.0050049660048743,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0050049660048743,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand000",
+    "lat": 34.352546490362016,
+    "lon": 35.07846205776318,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 1201.7739701202145,
+    "density_score": 434.0,
+    "weighted_support_score": 444.7739701202146,
+    "pixel_diversity_score": 323.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand001",
+    "lat": 34.316546490362015,
+    "lon": 35.07846205776318,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 394.1876060903713,
+    "density_score": 131.0,
+    "weighted_support_score": 132.18760609037128,
+    "pixel_diversity_score": 131.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand002",
+    "lat": 34.307546490362014,
+    "lon": 35.147462057763185,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 15.379003288322622,
+    "density_score": 5.0,
+    "weighted_support_score": 5.379003288322621,
+    "pixel_diversity_score": 5.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand003",
+    "lat": 34.37354649036202,
+    "lon": 35.00046205776318,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 5.9905149242485765,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9905149242485767,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand004",
+    "lat": 34.340546490362016,
+    "lon": 35.00046205776318,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 5.924272634470863,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9242726344708627,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand005",
+    "lat": 34.38254649036202,
+    "lon": 35.123462057763184,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 3.0699438765226867,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0699438765226865,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T09:35:58_cand006",
+    "lat": 34.340546490362016,
+    "lon": 35.171462057763186,
+    "t_s": "2019-06-12T09:35:58",
+    "support_score": 3.0556381690648164,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0556381690648162,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand000",
+    "lat": 34.349546490362016,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 1187.6285591751462,
+    "density_score": 430.0,
+    "weighted_support_score": 442.62855917514617,
+    "pixel_diversity_score": 315.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand001",
+    "lat": 34.313546490362015,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 380.6415598665943,
+    "density_score": 126.0,
+    "weighted_support_score": 128.64155986659432,
+    "pixel_diversity_score": 126.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand002",
+    "lat": 34.340546490362016,
+    "lon": 35.168462057763186,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 9.259252808398992,
+    "density_score": 3.0,
+    "weighted_support_score": 3.259252808398992,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand003",
+    "lat": 34.36754649036202,
+    "lon": 35.00946205776318,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 5.958790323567798,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9587903235677977,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand004",
+    "lat": 34.337546490362016,
+    "lon": 35.00946205776318,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 5.90425503205072,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9042550320507206,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand005",
+    "lat": 34.304546490362014,
+    "lon": 35.165462057763186,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 3.1055519489036474,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1055519489036476,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand006",
+    "lat": 34.38254649036202,
+    "lon": 35.126462057763185,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 3.084169345679544,
+    "density_score": 1.0,
+    "weighted_support_score": 1.084169345679544,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T10:35:58_cand007",
+    "lat": 34.37954649036202,
+    "lon": 35.00046205776318,
+    "t_s": "2019-06-12T10:35:58",
+    "support_score": 2.9706817972353226,
+    "density_score": 1.0,
+    "weighted_support_score": 0.9706817972353227,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T11:35:58_cand000",
+    "lat": 34.346546490362016,
+    "lon": 35.09646205776318,
+    "t_s": "2019-06-12T11:35:58",
+    "support_score": 1157.4849237033022,
+    "density_score": 415.0,
+    "weighted_support_score": 436.48492370330223,
+    "pixel_diversity_score": 306.0
+  },
+  {
+    "candidate_id": "2019-06-12T11:35:58_cand001",
+    "lat": 34.310546490362015,
+    "lon": 35.09946205776318,
+    "t_s": "2019-06-12T11:35:58",
+    "support_score": 378.5911028659767,
+    "density_score": 124.0,
+    "weighted_support_score": 130.59110286597672,
+    "pixel_diversity_score": 124.0
+  },
+  {
+    "candidate_id": "2019-06-12T11:35:58_cand002",
+    "lat": 34.36454649036202,
+    "lon": 35.01546205776318,
+    "t_s": "2019-06-12T11:35:58",
+    "support_score": 5.941423466691038,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9414234666910386,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T11:35:58_cand003",
+    "lat": 34.334546490362015,
+    "lon": 35.01846205776318,
+    "t_s": "2019-06-12T11:35:58",
+    "support_score": 5.9061273344148795,
+    "density_score": 2.0,
+    "weighted_support_score": 1.90612733441488,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T11:35:58_cand004",
+    "lat": 34.331546490362015,
+    "lon": 35.18646205776319,
+    "t_s": "2019-06-12T11:35:58",
+    "support_score": 3.12443023315622,
+    "density_score": 1.0,
+    "weighted_support_score": 1.12443023315622,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T11:35:58_cand005",
+    "lat": 34.37654649036202,
+    "lon": 35.138462057763185,
+    "t_s": "2019-06-12T11:35:58",
+    "support_score": 3.1109375931363576,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1109375931363576,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T12:35:58_cand000",
+    "lat": 34.340546490362016,
+    "lon": 35.108462057763184,
+    "t_s": "2019-06-12T12:35:58",
+    "support_score": 1128.2370854217277,
+    "density_score": 391.0,
+    "weighted_support_score": 427.2370854217276,
+    "pixel_diversity_score": 310.0
+  },
+  {
+    "candidate_id": "2019-06-12T12:35:58_cand001",
+    "lat": 34.307546490362014,
+    "lon": 35.105462057763184,
+    "t_s": "2019-06-12T12:35:58",
+    "support_score": 398.33532628286287,
+    "density_score": 129.0,
+    "weighted_support_score": 140.33532628286287,
+    "pixel_diversity_score": 129.0
+  },
+  {
+    "candidate_id": "2019-06-12T12:35:58_cand002",
+    "lat": 34.292546490362014,
+    "lon": 35.17746205776319,
+    "t_s": "2019-06-12T12:35:58",
+    "support_score": 15.889695964077948,
+    "density_score": 5.0,
+    "weighted_support_score": 5.889695964077948,
+    "pixel_diversity_score": 5.0
+  },
+  {
+    "candidate_id": "2019-06-12T12:35:58_cand003",
+    "lat": 34.328546490362015,
+    "lon": 35.02746205776318,
+    "t_s": "2019-06-12T12:35:58",
+    "support_score": 5.931703883834716,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9317038838347163,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T12:35:58_cand004",
+    "lat": 34.331546490362015,
+    "lon": 35.19846205776319,
+    "t_s": "2019-06-12T12:35:58",
+    "support_score": 3.1670035577595335,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1670035577595335,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T12:35:58_cand005",
+    "lat": 34.304546490362014,
+    "lon": 35.03946205776318,
+    "t_s": "2019-06-12T12:35:58",
+    "support_score": 2.9707301599515215,
+    "density_score": 1.0,
+    "weighted_support_score": 0.9707301599515215,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T13:35:58_cand000",
+    "lat": 34.337546490362016,
+    "lon": 35.117462057763184,
+    "t_s": "2019-06-12T13:35:58",
+    "support_score": 1136.1151132609643,
+    "density_score": 389.0,
+    "weighted_support_score": 441.11511326096434,
+    "pixel_diversity_score": 306.0
+  },
+  {
+    "candidate_id": "2019-06-12T13:35:58_cand001",
+    "lat": 34.301546490362014,
+    "lon": 35.120462057763184,
+    "t_s": "2019-06-12T13:35:58",
+    "support_score": 383.51850021384405,
+    "density_score": 122.0,
+    "weighted_support_score": 139.51850021384405,
+    "pixel_diversity_score": 122.0
+  },
+  {
+    "candidate_id": "2019-06-12T13:35:58_cand002",
+    "lat": 34.325546490362015,
+    "lon": 35.03946205776318,
+    "t_s": "2019-06-12T13:35:58",
+    "support_score": 5.980255232314161,
+    "density_score": 2.0,
+    "weighted_support_score": 1.9802552323141613,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T13:35:58_cand003",
+    "lat": 34.325546490362015,
+    "lon": 35.21046205776319,
+    "t_s": "2019-06-12T13:35:58",
+    "support_score": 3.2128562797226587,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2128562797226585,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T13:35:58_cand004",
+    "lat": 34.304546490362014,
+    "lon": 35.04246205776318,
+    "t_s": "2019-06-12T13:35:58",
+    "support_score": 3.0048211058512866,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0048211058512864,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T14:35:58_cand000",
+    "lat": 34.334546490362015,
+    "lon": 35.126462057763185,
+    "t_s": "2019-06-12T14:35:58",
+    "support_score": 1097.7959645162366,
+    "density_score": 371.0,
+    "weighted_support_score": 436.79596451623655,
+    "pixel_diversity_score": 290.0
+  },
+  {
+    "candidate_id": "2019-06-12T14:35:58_cand001",
+    "lat": 34.298546490362014,
+    "lon": 35.126462057763185,
+    "t_s": "2019-06-12T14:35:58",
+    "support_score": 394.98125851241787,
+    "density_score": 124.0,
+    "weighted_support_score": 146.98125851241787,
+    "pixel_diversity_score": 124.0
+  },
+  {
+    "candidate_id": "2019-06-12T14:35:58_cand002",
+    "lat": 34.28054649036201,
+    "lon": 35.19846205776319,
+    "t_s": "2019-06-12T14:35:58",
+    "support_score": 13.114286422416074,
+    "density_score": 4.0,
+    "weighted_support_score": 5.114286422416074,
+    "pixel_diversity_score": 4.0
+  },
+  {
+    "candidate_id": "2019-06-12T14:35:58_cand003",
+    "lat": 34.325546490362015,
+    "lon": 35.04546205776318,
+    "t_s": "2019-06-12T14:35:58",
+    "support_score": 6.044927183089778,
+    "density_score": 2.0,
+    "weighted_support_score": 2.0449271830897784,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T14:35:58_cand004",
+    "lat": 34.316546490362015,
+    "lon": 35.21946205776319,
+    "t_s": "2019-06-12T14:35:58",
+    "support_score": 3.2601361738811,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2601361738810999,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T14:35:58_cand005",
+    "lat": 34.298546490362014,
+    "lon": 35.05446205776318,
+    "t_s": "2019-06-12T14:35:58",
+    "support_score": 3.044627171402627,
+    "density_score": 1.0,
+    "weighted_support_score": 1.044627171402627,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand000",
+    "lat": 34.328546490362015,
+    "lon": 35.138462057763185,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 1098.5055227035316,
+    "density_score": 363.0,
+    "weighted_support_score": 445.5055227035316,
+    "pixel_diversity_score": 290.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand001",
+    "lat": 34.292546490362014,
+    "lon": 35.135462057763185,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 394.58885963425445,
+    "density_score": 122.0,
+    "weighted_support_score": 150.58885963425445,
+    "pixel_diversity_score": 122.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand002",
+    "lat": 34.27154649036201,
+    "lon": 35.20746205776319,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 9.987332079904302,
+    "density_score": 3.0,
+    "weighted_support_score": 3.9873320799043026,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand003",
+    "lat": 34.319546490362015,
+    "lon": 35.05746205776318,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 6.119643740447355,
+    "density_score": 2.0,
+    "weighted_support_score": 2.119643740447355,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand004",
+    "lat": 34.307546490362014,
+    "lon": 35.22546205776319,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 3.3067861722294363,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3067861722294363,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand005",
+    "lat": 34.322546490362015,
+    "lon": 35.22546205776319,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 3.3067861722294363,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3067861722294363,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T15:35:58_cand006",
+    "lat": 34.352546490362016,
+    "lon": 35.04546205776318,
+    "t_s": "2019-06-12T15:35:58",
+    "support_score": 3.0251452938056094,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0251452938056091,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand000",
+    "lat": 34.316546490362015,
+    "lon": 35.150462057763185,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 1103.405540552831,
+    "density_score": 360.0,
+    "weighted_support_score": 460.405540552831,
+    "pixel_diversity_score": 283.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand001",
+    "lat": 34.286546490362014,
+    "lon": 35.144462057763185,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 390.343945194701,
+    "density_score": 119.0,
+    "weighted_support_score": 152.343945194701,
+    "pixel_diversity_score": 119.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand002",
+    "lat": 34.28054649036201,
+    "lon": 35.159462057763186,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 350.7616191908037,
+    "density_score": 106.0,
+    "weighted_support_score": 138.7616191908037,
+    "pixel_diversity_score": 106.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand003",
+    "lat": 34.313546490362015,
+    "lon": 35.06346205776318,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 6.199328110928107,
+    "density_score": 2.0,
+    "weighted_support_score": 2.199328110928107,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand004",
+    "lat": 34.301546490362014,
+    "lon": 35.23446205776319,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 3.347101789385484,
+    "density_score": 1.0,
+    "weighted_support_score": 1.347101789385484,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand005",
+    "lat": 34.289546490362014,
+    "lon": 35.07246205776318,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 3.1326852526766347,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1326852526766347,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T16:35:58_cand006",
+    "lat": 34.37954649036202,
+    "lon": 35.111462057763184,
+    "t_s": "2019-06-12T16:35:58",
+    "support_score": 3.1217722446600673,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1217722446600673,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand000",
+    "lat": 34.313546490362015,
+    "lon": 35.153462057763186,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 1129.8864166617532,
+    "density_score": 367.0,
+    "weighted_support_score": 476.8864166617532,
+    "pixel_diversity_score": 286.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand001",
+    "lat": 34.28054649036201,
+    "lon": 35.150462057763185,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 410.71954341186733,
+    "density_score": 124.0,
+    "weighted_support_score": 162.7195434118673,
+    "pixel_diversity_score": 124.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand002",
+    "lat": 34.25654649036201,
+    "lon": 35.21946205776319,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 10.212837877049104,
+    "density_score": 3.0,
+    "weighted_support_score": 4.212837877049104,
+    "pixel_diversity_score": 3.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand003",
+    "lat": 34.310546490362015,
+    "lon": 35.07246205776318,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 6.272060865260948,
+    "density_score": 2.0,
+    "weighted_support_score": 2.272060865260948,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand004",
+    "lat": 34.289546490362014,
+    "lon": 35.23746205776319,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 3.377784269148462,
+    "density_score": 1.0,
+    "weighted_support_score": 1.377784269148462,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand005",
+    "lat": 34.304546490362014,
+    "lon": 35.23446205776319,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 3.377784269148462,
+    "density_score": 1.0,
+    "weighted_support_score": 1.377784269148462,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand006",
+    "lat": 34.343546490362016,
+    "lon": 35.19846205776319,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 3.3176524599529653,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3176524599529655,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T17:35:58_cand007",
+    "lat": 34.346546490362016,
+    "lon": 35.06046205776318,
+    "t_s": "2019-06-12T17:35:58",
+    "support_score": 3.090710942232299,
+    "density_score": 1.0,
+    "weighted_support_score": 1.0907109422322987,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand000",
+    "lat": 34.307546490362014,
+    "lon": 35.162462057763186,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 1129.9311508828337,
+    "density_score": 365.0,
+    "weighted_support_score": 480.9311508828337,
+    "pixel_diversity_score": 284.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand001",
+    "lat": 34.27454649036201,
+    "lon": 35.156462057763186,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 406.4979944981675,
+    "density_score": 122.0,
+    "weighted_support_score": 162.49799449816746,
+    "pixel_diversity_score": 122.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand002",
+    "lat": 34.26854649036201,
+    "lon": 35.171462057763186,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 342.7235209669961,
+    "density_score": 102.0,
+    "weighted_support_score": 138.7235209669961,
+    "pixel_diversity_score": 102.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand003",
+    "lat": 34.307546490362014,
+    "lon": 35.07546205776318,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 6.334824956157631,
+    "density_score": 2.0,
+    "weighted_support_score": 2.334824956157631,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand004",
+    "lat": 34.28054649036201,
+    "lon": 35.24046205776319,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 3.3956014450208807,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3956014450208807,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand005",
+    "lat": 34.295546490362014,
+    "lon": 35.24046205776319,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 3.3956014450208807,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3956014450208807,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand006",
+    "lat": 34.28054649036201,
+    "lon": 35.08446205776318,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 3.202506221069495,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2025062210694946,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T18:35:58_cand007",
+    "lat": 34.337546490362016,
+    "lon": 35.07246205776318,
+    "t_s": "2019-06-12T18:35:58",
+    "support_score": 3.119608115943768,
+    "density_score": 1.0,
+    "weighted_support_score": 1.119608115943768,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand000",
+    "lat": 34.295546490362014,
+    "lon": 35.174462057763186,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 1169.6982224748233,
+    "density_score": 374.0,
+    "weighted_support_score": 498.69822247482335,
+    "pixel_diversity_score": 297.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand001",
+    "lat": 34.26554649036201,
+    "lon": 35.159462057763186,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 427.2373219274428,
+    "density_score": 128.0,
+    "weighted_support_score": 171.2373219274428,
+    "pixel_diversity_score": 128.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand002",
+    "lat": 34.298546490362014,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 6.3799047935541155,
+    "density_score": 2.0,
+    "weighted_support_score": 2.3799047935541155,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand003",
+    "lat": 34.27454649036201,
+    "lon": 35.24646205776319,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 3.399328460958738,
+    "density_score": 1.0,
+    "weighted_support_score": 1.399328460958738,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand004",
+    "lat": 34.27754649036201,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 3.2233810196393717,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2233810196393717,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand005",
+    "lat": 34.36154649036202,
+    "lon": 35.129462057763185,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 3.173130299205747,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1731302992057466,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T19:35:58_cand006",
+    "lat": 34.331546490362015,
+    "lon": 35.08146205776318,
+    "t_s": "2019-06-12T19:35:58",
+    "support_score": 3.141182003149055,
+    "density_score": 1.0,
+    "weighted_support_score": 1.141182003149055,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T20:35:58_cand000",
+    "lat": 34.295546490362014,
+    "lon": 35.168462057763186,
+    "t_s": "2019-06-12T20:35:58",
+    "support_score": 1214.3346061940524,
+    "density_score": 398.0,
+    "weighted_support_score": 518.3346061940525,
+    "pixel_diversity_score": 298.0
+  },
+  {
+    "candidate_id": "2019-06-12T20:35:58_cand001",
+    "lat": 34.25954649036201,
+    "lon": 35.165462057763186,
+    "t_s": "2019-06-12T20:35:58",
+    "support_score": 416.45804842949116,
+    "density_score": 125.0,
+    "weighted_support_score": 166.45804842949116,
+    "pixel_diversity_score": 125.0
+  },
+  {
+    "candidate_id": "2019-06-12T20:35:58_cand002",
+    "lat": 34.26554649036201,
+    "lon": 35.24946205776319,
+    "t_s": "2019-06-12T20:35:58",
+    "support_score": 3.3886693078454266,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3886693078454266,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T20:35:58_cand003",
+    "lat": 34.27454649036201,
+    "lon": 35.09346205776318,
+    "t_s": "2019-06-12T20:35:58",
+    "support_score": 3.2311476721429004,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2311476721429007,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T20:35:58_cand004",
+    "lat": 34.325546490362015,
+    "lon": 35.08746205776318,
+    "t_s": "2019-06-12T20:35:58",
+    "support_score": 3.151873540503309,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1518735405033091,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T21:35:58_cand000",
+    "lat": 34.286546490362014,
+    "lon": 35.17746205776319,
+    "t_s": "2019-06-12T21:35:58",
+    "support_score": 1291.2113442259856,
+    "density_score": 424.0,
+    "weighted_support_score": 545.2113442259856,
+    "pixel_diversity_score": 322.0
+  },
+  {
+    "candidate_id": "2019-06-12T21:35:58_cand001",
+    "lat": 34.25954649036201,
+    "lon": 35.165462057763186,
+    "t_s": "2019-06-12T21:35:58",
+    "support_score": 424.78532700798974,
+    "density_score": 129.0,
+    "weighted_support_score": 167.78532700798974,
+    "pixel_diversity_score": 128.0
+  },
+  {
+    "candidate_id": "2019-06-12T21:35:58_cand002",
+    "lat": 34.25654649036201,
+    "lon": 35.24946205776319,
+    "t_s": "2019-06-12T21:35:58",
+    "support_score": 3.363296574466931,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3632965744669308,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T21:35:58_cand003",
+    "lat": 34.26854649036201,
+    "lon": 35.09946205776318,
+    "t_s": "2019-06-12T21:35:58",
+    "support_score": 3.2251761166129898,
+    "density_score": 1.0,
+    "weighted_support_score": 1.22517611661299,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T21:35:58_cand004",
+    "lat": 34.319546490362015,
+    "lon": 35.09646205776318,
+    "t_s": "2019-06-12T21:35:58",
+    "support_score": 3.1489208113630838,
+    "density_score": 1.0,
+    "weighted_support_score": 1.148920811363084,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T22:35:58_cand000",
+    "lat": 34.28054649036201,
+    "lon": 35.18346205776319,
+    "t_s": "2019-06-12T22:35:58",
+    "support_score": 1320.4692328533406,
+    "density_score": 438.0,
+    "weighted_support_score": 549.4692328533405,
+    "pixel_diversity_score": 333.0
+  },
+  {
+    "candidate_id": "2019-06-12T22:35:58_cand001",
+    "lat": 34.25054649036201,
+    "lon": 35.174462057763186,
+    "t_s": "2019-06-12T22:35:58",
+    "support_score": 432.6567980927139,
+    "density_score": 132.0,
+    "weighted_support_score": 168.65679809271393,
+    "pixel_diversity_score": 132.0
+  },
+  {
+    "candidate_id": "2019-06-12T22:35:58_cand002",
+    "lat": 34.25054649036201,
+    "lon": 35.25246205776319,
+    "t_s": "2019-06-12T22:35:58",
+    "support_score": 3.3251446099954016,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3251446099954016,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T22:35:58_cand003",
+    "lat": 34.322546490362015,
+    "lon": 35.105462057763184,
+    "t_s": "2019-06-12T22:35:58",
+    "support_score": 3.1318501651899826,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1318501651899824,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-12T23:35:58_cand000",
+    "lat": 34.27754649036201,
+    "lon": 35.18346205776319,
+    "t_s": "2019-06-12T23:35:58",
+    "support_score": 1384.9635501443106,
+    "density_score": 472.0,
+    "weighted_support_score": 569.9635501443106,
+    "pixel_diversity_score": 343.0
+  },
+  {
+    "candidate_id": "2019-06-12T23:35:58_cand001",
+    "lat": 34.24454649036201,
+    "lon": 35.174462057763186,
+    "t_s": "2019-06-12T23:35:58",
+    "support_score": 466.28050079703644,
+    "density_score": 144.0,
+    "weighted_support_score": 178.28050079703644,
+    "pixel_diversity_score": 144.0
+  },
+  {
+    "candidate_id": "2019-06-12T23:35:58_cand002",
+    "lat": 34.24754649036201,
+    "lon": 35.25246205776319,
+    "t_s": "2019-06-12T23:35:58",
+    "support_score": 3.2774307223050165,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2774307223050165,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T00:35:58_cand000",
+    "lat": 34.27454649036201,
+    "lon": 35.18646205776319,
+    "t_s": "2019-06-13T00:35:58",
+    "support_score": 1432.0280291354766,
+    "density_score": 498.0,
+    "weighted_support_score": 581.0280291354767,
+    "pixel_diversity_score": 353.0
+  },
+  {
+    "candidate_id": "2019-06-13T00:35:58_cand001",
+    "lat": 34.24154649036201,
+    "lon": 35.18046205776319,
+    "t_s": "2019-06-13T00:35:58",
+    "support_score": 461.00043634972747,
+    "density_score": 144.0,
+    "weighted_support_score": 173.00043634972744,
+    "pixel_diversity_score": 144.0
+  },
+  {
+    "candidate_id": "2019-06-13T00:35:58_cand002",
+    "lat": 34.24154649036201,
+    "lon": 35.25546205776319,
+    "t_s": "2019-06-13T00:35:58",
+    "support_score": 3.228964895542404,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2289648955424044,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T01:35:58_cand000",
+    "lat": 34.26854649036201,
+    "lon": 35.18646205776319,
+    "t_s": "2019-06-13T01:35:58",
+    "support_score": 1477.431695454268,
+    "density_score": 518.0,
+    "weighted_support_score": 588.431695454268,
+    "pixel_diversity_score": 371.0
+  },
+  {
+    "candidate_id": "2019-06-13T01:35:58_cand001",
+    "lat": 34.23854649036201,
+    "lon": 35.18046205776319,
+    "t_s": "2019-06-13T01:35:58",
+    "support_score": 483.29528866784267,
+    "density_score": 153.0,
+    "weighted_support_score": 178.29528866784267,
+    "pixel_diversity_score": 152.0
+  },
+  {
+    "candidate_id": "2019-06-13T02:35:58_cand000",
+    "lat": 34.26554649036201,
+    "lon": 35.18946205776319,
+    "t_s": "2019-06-13T02:35:58",
+    "support_score": 1540.394038518627,
+    "density_score": 548.0,
+    "weighted_support_score": 609.3940385186269,
+    "pixel_diversity_score": 383.0
+  },
+  {
+    "candidate_id": "2019-06-13T02:35:58_cand001",
+    "lat": 34.23254649036201,
+    "lon": 35.18646205776319,
+    "t_s": "2019-06-13T02:35:58",
+    "support_score": 496.668376568095,
+    "density_score": 158.0,
+    "weighted_support_score": 180.66837656809503,
+    "pixel_diversity_score": 158.0
+  },
+  {
+    "candidate_id": "2019-06-13T03:35:58_cand000",
+    "lat": 34.26254649036201,
+    "lon": 35.19246205776319,
+    "t_s": "2019-06-13T03:35:58",
+    "support_score": 1557.8570827574167,
+    "density_score": 558.0,
+    "weighted_support_score": 612.8570827574168,
+    "pixel_diversity_score": 387.0
+  },
+  {
+    "candidate_id": "2019-06-13T04:35:58_cand000",
+    "lat": 34.25954649036201,
+    "lon": 35.19846205776319,
+    "t_s": "2019-06-13T04:35:58",
+    "support_score": 1593.2814940243961,
+    "density_score": 574.0,
+    "weighted_support_score": 630.281494024396,
+    "pixel_diversity_score": 389.0
+  },
+  {
+    "candidate_id": "2019-06-13T04:35:58_cand001",
+    "lat": 34.23554649036201,
+    "lon": 35.26146205776319,
+    "t_s": "2019-06-13T04:35:58",
+    "support_score": 6.261152761725487,
+    "density_score": 2.0,
+    "weighted_support_score": 2.261152761725487,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-13T05:35:58_cand000",
+    "lat": 34.25654649036201,
+    "lon": 35.20146205776319,
+    "t_s": "2019-06-13T05:35:58",
+    "support_score": 1627.838340705301,
+    "density_score": 586.0,
+    "weighted_support_score": 647.8383407053011,
+    "pixel_diversity_score": 394.0
+  },
+  {
+    "candidate_id": "2019-06-13T05:35:58_cand001",
+    "lat": 34.23254649036201,
+    "lon": 35.26746205776319,
+    "t_s": "2019-06-13T05:35:58",
+    "support_score": 6.285848382962052,
+    "density_score": 2.0,
+    "weighted_support_score": 2.285848382962052,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-13T06:35:58_cand000",
+    "lat": 34.25354649036201,
+    "lon": 35.21046205776319,
+    "t_s": "2019-06-13T06:35:58",
+    "support_score": 1631.7893084372545,
+    "density_score": 579.0,
+    "weighted_support_score": 651.7893084372544,
+    "pixel_diversity_score": 401.0
+  },
+  {
+    "candidate_id": "2019-06-13T06:35:58_cand001",
+    "lat": 34.22954649036201,
+    "lon": 35.27346205776319,
+    "t_s": "2019-06-13T06:35:58",
+    "support_score": 6.34082466659648,
+    "density_score": 2.0,
+    "weighted_support_score": 2.34082466659648,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-13T07:35:58_cand000",
+    "lat": 34.25054649036201,
+    "lon": 35.21646205776319,
+    "t_s": "2019-06-13T07:35:58",
+    "support_score": 1625.3773889651482,
+    "density_score": 577.0,
+    "weighted_support_score": 664.3773889651482,
+    "pixel_diversity_score": 384.0
+  },
+  {
+    "candidate_id": "2019-06-13T07:35:58_cand001",
+    "lat": 34.22654649036201,
+    "lon": 35.27946205776319,
+    "t_s": "2019-06-13T07:35:58",
+    "support_score": 6.41857054504173,
+    "density_score": 2.0,
+    "weighted_support_score": 2.41857054504173,
+    "pixel_diversity_score": 2.0
+  },
+  {
+    "candidate_id": "2019-06-13T07:35:58_cand002",
+    "lat": 34.20554649036201,
+    "lon": 35.26746205776319,
+    "t_s": "2019-06-13T07:35:58",
+    "support_score": 3.2335024850758582,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2335024850758585,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T08:35:58_cand000",
+    "lat": 34.24754649036201,
+    "lon": 35.22546205776319,
+    "t_s": "2019-06-13T08:35:58",
+    "support_score": 1627.9390913507239,
+    "density_score": 569.0,
+    "weighted_support_score": 673.9390913507239,
+    "pixel_diversity_score": 385.0
+  },
+  {
+    "candidate_id": "2019-06-13T08:35:58_cand001",
+    "lat": 34.20254649036201,
+    "lon": 35.27946205776319,
+    "t_s": "2019-06-13T08:35:58",
+    "support_score": 3.2740399696446483,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2740399696446483,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T09:35:58_cand000",
+    "lat": 34.24454649036201,
+    "lon": 35.23446205776319,
+    "t_s": "2019-06-13T09:35:58",
+    "support_score": 1608.209847036918,
+    "density_score": 553.0,
+    "weighted_support_score": 674.2098470369181,
+    "pixel_diversity_score": 381.0
+  },
+  {
+    "candidate_id": "2019-06-13T09:35:58_cand001",
+    "lat": 34.19654649036201,
+    "lon": 35.28546205776319,
+    "t_s": "2019-06-13T09:35:58",
+    "support_score": 3.3108932128385415,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3108932128385413,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T09:35:58_cand002",
+    "lat": 34.24454649036201,
+    "lon": 35.29146205776319,
+    "t_s": "2019-06-13T09:35:58",
+    "support_score": 3.2609445829084347,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2609445829084345,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T10:35:58_cand000",
+    "lat": 34.23854649036201,
+    "lon": 35.24046205776319,
+    "t_s": "2019-06-13T10:35:58",
+    "support_score": 1601.4707482749895,
+    "density_score": 547.0,
+    "weighted_support_score": 682.4707482749895,
+    "pixel_diversity_score": 372.0
+  },
+  {
+    "candidate_id": "2019-06-13T10:35:58_cand001",
+    "lat": 34.23254649036201,
+    "lon": 35.30346205776319,
+    "t_s": "2019-06-13T10:35:58",
+    "support_score": 3.3003182013635755,
+    "density_score": 1.0,
+    "weighted_support_score": 1.3003182013635757,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T11:35:58_cand000",
+    "lat": 34.23254649036201,
+    "lon": 35.24946205776319,
+    "t_s": "2019-06-13T11:35:58",
+    "support_score": 1640.1001654979812,
+    "density_score": 558.0,
+    "weighted_support_score": 709.1001654979812,
+    "pixel_diversity_score": 373.0
+  },
+  {
+    "candidate_id": "2019-06-13T11:35:58_cand001",
+    "lat": 34.26554649036201,
+    "lon": 35.18946205776319,
+    "t_s": "2019-06-13T11:35:58",
+    "support_score": 3.1800242681228577,
+    "density_score": 1.0,
+    "weighted_support_score": 1.1800242681228579,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T12:35:58_cand000",
+    "lat": 34.22054649036201,
+    "lon": 35.26146205776319,
+    "t_s": "2019-06-13T12:35:58",
+    "support_score": 1663.3753765528736,
+    "density_score": 563.0,
+    "weighted_support_score": 724.3753765528736,
+    "pixel_diversity_score": 376.0
+  },
+  {
+    "candidate_id": "2019-06-13T12:35:58_cand001",
+    "lat": 34.25954649036201,
+    "lon": 35.19846205776319,
+    "t_s": "2019-06-13T12:35:58",
+    "support_score": 3.2084433381885225,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2084433381885222,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T13:35:58_cand000",
+    "lat": 34.21154649036201,
+    "lon": 35.27346205776319,
+    "t_s": "2019-06-13T13:35:58",
+    "support_score": 1760.900818820844,
+    "density_score": 600.0,
+    "weighted_support_score": 768.9008188208442,
+    "pixel_diversity_score": 392.0
+  },
+  {
+    "candidate_id": "2019-06-13T13:35:58_cand001",
+    "lat": 34.16654649036201,
+    "lon": 35.31846205776319,
+    "t_s": "2019-06-13T13:35:58",
+    "support_score": 3.2897302517577445,
+    "density_score": 1.0,
+    "weighted_support_score": 1.2897302517577445,
+    "pixel_diversity_score": 1.0
+  },
+  {
+    "candidate_id": "2019-06-13T14:35:58_cand000",
+    "lat": 34.20554649036201,
+    "lon": 35.27946205776319,
+    "t_s": "2019-06-13T14:35:58",
+    "support_score": 1813.731899908078,
+    "density_score": 623.0,
+    "weighted_support_score": 784.731899908078,
+    "pixel_diversity_score": 406.0
+  },
+  {
+    "candidate_id": "2019-06-13T15:35:58_cand000",
+    "lat": 34.19654649036201,
+    "lon": 35.28246205776319,
+    "t_s": "2019-06-13T15:35:58",
+    "support_score": 1896.805201999388,
+    "density_score": 665.0,
+    "weighted_support_score": 815.8052019993879,
+    "pixel_diversity_score": 416.0
+  },
+  {
+    "candidate_id": "2019-06-13T16:35:58_cand000",
+    "lat": 34.18754649036201,
+    "lon": 35.28546205776319,
+    "t_s": "2019-06-13T16:35:58",
+    "support_score": 1992.3172092043606,
+    "density_score": 716.0,
+    "weighted_support_score": 853.3172092043606,
+    "pixel_diversity_score": 423.0
+  },
+  {
+    "candidate_id": "2019-06-13T17:35:58_cand000",
+    "lat": 34.18154649036201,
+    "lon": 35.28246205776319,
+    "t_s": "2019-06-13T17:35:58",
+    "support_score": 2111.9639836715596,
+    "density_score": 766.0,
+    "weighted_support_score": 891.9639836715597,
+    "pixel_diversity_score": 454.0
+  },
+  {
+    "candidate_id": "2019-06-13T18:35:58_cand000",
+    "lat": 34.17254649036201,
+    "lon": 35.27946205776319,
+    "t_s": "2019-06-13T18:35:58",
+    "support_score": 2233.0547523407317,
+    "density_score": 829.0,
+    "weighted_support_score": 944.0547523407316,
+    "pixel_diversity_score": 460.0
+  },
+  {
+    "candidate_id": "2019-06-13T19:35:58_cand000",
+    "lat": 34.16654649036201,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-13T19:35:58",
+    "support_score": 2398.022476256351,
+    "density_score": 905.0,
+    "weighted_support_score": 1012.022476256351,
+    "pixel_diversity_score": 481.0
+  },
+  {
+    "candidate_id": "2019-06-13T20:35:58_cand000",
+    "lat": 34.16354649036201,
+    "lon": 35.27046205776319,
+    "t_s": "2019-06-13T20:35:58",
+    "support_score": 2528.5274503770124,
+    "density_score": 964.0,
+    "weighted_support_score": 1065.5274503770127,
+    "pixel_diversity_score": 499.0
+  },
+  {
+    "candidate_id": "2019-06-13T21:35:58_cand000",
+    "lat": 34.16054649036201,
+    "lon": 35.26446205776319,
+    "t_s": "2019-06-13T21:35:58",
+    "support_score": 2608.292013687149,
+    "density_score": 1008.0,
+    "weighted_support_score": 1102.292013687149,
+    "pixel_diversity_score": 498.0
+  },
+  {
+    "candidate_id": "2019-06-13T22:35:58_cand000",
+    "lat": 34.15754649036201,
+    "lon": 35.26146205776319,
+    "t_s": "2019-06-13T22:35:58",
+    "support_score": 2693.6554343606954,
+    "density_score": 1052.0,
+    "weighted_support_score": 1136.6554343606954,
+    "pixel_diversity_score": 505.0
+  },
+  {
+    "candidate_id": "2019-06-13T23:35:58_cand000",
+    "lat": 34.15754649036201,
+    "lon": 35.25546205776319,
+    "t_s": "2019-06-13T23:35:58",
+    "support_score": 2827.2279871127926,
+    "density_score": 1121.0,
+    "weighted_support_score": 1195.2279871127926,
+    "pixel_diversity_score": 511.0
+  },
+  {
+    "candidate_id": "2019-06-14T00:35:58_cand000",
+    "lat": 34.15754649036201,
+    "lon": 35.25246205776319,
+    "t_s": "2019-06-14T00:35:58",
+    "support_score": 2891.3736237905705,
+    "density_score": 1160.0,
+    "weighted_support_score": 1220.3736237905703,
+    "pixel_diversity_score": 511.0
+  },
+  {
+    "candidate_id": "2019-06-14T01:35:58_cand000",
+    "lat": 34.15754649036201,
+    "lon": 35.25546205776319,
+    "t_s": "2019-06-14T01:35:58",
+    "support_score": 2985.399494107446,
+    "density_score": 1208.0,
+    "weighted_support_score": 1261.3994941074461,
+    "pixel_diversity_score": 516.0
+  },
+  {
+    "candidate_id": "2019-06-14T02:35:58_cand000",
+    "lat": 34.15754649036201,
+    "lon": 35.25546205776319,
+    "t_s": "2019-06-14T02:35:58",
+    "support_score": 3081.9432693178533,
+    "density_score": 1256.0,
+    "weighted_support_score": 1310.943269317853,
+    "pixel_diversity_score": 515.0
+  },
+  {
+    "candidate_id": "2019-06-14T03:35:58_cand000",
+    "lat": 34.15754649036201,
+    "lon": 35.25846205776319,
+    "t_s": "2019-06-14T03:35:58",
+    "support_score": 3221.438103369087,
+    "density_score": 1319.0,
+    "weighted_support_score": 1385.4381033690872,
+    "pixel_diversity_score": 517.0
+  },
+  {
+    "candidate_id": "2019-06-14T04:35:58_cand000",
+    "lat": 34.15154649036201,
+    "lon": 35.26146205776319,
+    "t_s": "2019-06-14T04:35:58",
+    "support_score": 3323.2181856857424,
+    "density_score": 1361.0,
+    "weighted_support_score": 1450.2181856857424,
+    "pixel_diversity_score": 512.0
+  },
+  {
+    "candidate_id": "2019-06-14T05:35:58_cand000",
+    "lat": 34.14854649036201,
+    "lon": 35.26446205776319,
+    "t_s": "2019-06-14T05:35:58",
+    "support_score": 3424.191108676783,
+    "density_score": 1400.0,
+    "weighted_support_score": 1509.191108676783,
+    "pixel_diversity_score": 515.0
+  },
+  {
+    "candidate_id": "2019-06-14T06:35:58_cand000",
+    "lat": 34.14254649036201,
+    "lon": 35.26746205776319,
+    "t_s": "2019-06-14T06:35:58",
+    "support_score": 3547.0251776453715,
+    "density_score": 1451.0,
+    "weighted_support_score": 1580.0251776453713,
+    "pixel_diversity_score": 516.0
+  },
+  {
+    "candidate_id": "2019-06-14T07:35:58_cand000",
+    "lat": 34.13654649036201,
+    "lon": 35.27046205776319,
+    "t_s": "2019-06-14T07:35:58",
+    "support_score": 3687.6753609171055,
+    "density_score": 1515.0,
+    "weighted_support_score": 1656.6753609171055,
+    "pixel_diversity_score": 516.0
+  },
+  {
+    "candidate_id": "2019-06-14T08:35:58_cand000",
+    "lat": 34.13354649036201,
+    "lon": 35.27346205776319,
+    "t_s": "2019-06-14T08:35:58",
+    "support_score": 3749.5137589813344,
+    "density_score": 1541.0,
+    "weighted_support_score": 1681.5137589813344,
+    "pixel_diversity_score": 527.0
+  },
+  {
+    "candidate_id": "2019-06-14T09:35:58_cand000",
+    "lat": 34.12754649036201,
+    "lon": 35.27346205776319,
+    "t_s": "2019-06-14T09:35:58",
+    "support_score": 3870.765099365726,
+    "density_score": 1610.0,
+    "weighted_support_score": 1743.765099365726,
+    "pixel_diversity_score": 517.0
+  },
+  {
+    "candidate_id": "2019-06-14T10:35:58_cand000",
+    "lat": 34.12154649036201,
+    "lon": 35.27346205776319,
+    "t_s": "2019-06-14T10:35:58",
+    "support_score": 4024.6348705673345,
+    "density_score": 1700.0,
+    "weighted_support_score": 1823.6348705673345,
+    "pixel_diversity_score": 501.0
+  },
+  {
+    "candidate_id": "2019-06-14T11:35:58_cand000",
+    "lat": 34.11854649036201,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-14T11:35:58",
+    "support_score": 4124.952393973248,
+    "density_score": 1750.0,
+    "weighted_support_score": 1858.9523939732476,
+    "pixel_diversity_score": 516.0
+  },
+  {
+    "candidate_id": "2019-06-14T12:35:58_cand000",
+    "lat": 34.11254649036201,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-14T12:35:58",
+    "support_score": 4226.004834581624,
+    "density_score": 1812.0,
+    "weighted_support_score": 1910.0048345816238,
+    "pixel_diversity_score": 504.0
+  },
+  {
+    "candidate_id": "2019-06-14T13:35:58_cand000",
+    "lat": 34.10954649036201,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-14T13:35:58",
+    "support_score": 4250.756882270391,
+    "density_score": 1825.0,
+    "weighted_support_score": 1911.7568822703906,
+    "pixel_diversity_score": 514.0
+  },
+  {
+    "candidate_id": "2019-06-14T14:35:58_cand000",
+    "lat": 34.10354649036201,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-14T14:35:58",
+    "support_score": 4330.886148676071,
+    "density_score": 1878.0,
+    "weighted_support_score": 1967.886148676071,
+    "pixel_diversity_score": 485.0
+  },
+  {
+    "candidate_id": "2019-06-14T15:35:58_cand000",
+    "lat": 34.10054649036201,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-14T15:35:58",
+    "support_score": 4393.763160722111,
+    "density_score": 1904.0,
+    "weighted_support_score": 1991.7631607221113,
+    "pixel_diversity_score": 498.0
+  },
+  {
+    "candidate_id": "2019-06-14T16:35:58_cand000",
+    "lat": 34.094546490362006,
+    "lon": 35.27646205776319,
+    "t_s": "2019-06-14T16:35:58",
+    "support_score": 4563.390204206773,
+    "density_score": 1996.0,
+    "weighted_support_score": 2086.3902042067734,
+    "pixel_diversity_score": 481.0
+  },
+  {
+    "candidate_id": "2019-06-14T17:35:58_cand000",
+    "lat": 34.091546490362006,
+    "lon": 35.27346205776319,
+    "t_s": "2019-06-14T17:35:58",
+    "support_score": 4571.856771269192,
+    "density_score": 2012.0,
+    "weighted_support_score": 2088.856771269192,
+    "pixel_diversity_score": 471.0
+  },
+  {
+    "candidate_id": "2019-06-14T18:35:58_cand000",
+    "lat": 34.085546490362006,
+    "lon": 35.27046205776319,
+    "t_s": "2019-06-14T18:35:58",
+    "support_score": 4675.408702863451,
+    "density_score": 2083.0,
+    "weighted_support_score": 2142.4087028634517,
+    "pixel_diversity_score": 450.0
+  },
+  {
+    "candidate_id": "2019-06-14T19:35:58_cand000",
+    "lat": 34.079546490362006,
+    "lon": 35.26746205776319,
+    "t_s": "2019-06-14T19:35:58",
+    "support_score": 4735.69363676619,
+    "density_score": 2141.0,
+    "weighted_support_score": 2173.69363676619,
+    "pixel_diversity_score": 421.0
+  }
+]

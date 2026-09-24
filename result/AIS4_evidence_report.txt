@@ -1,0 +1,27 @@
+TASK AIS-4 -- aggregate AIS vessel evidence report
+
+vessels considered: 264
+vessels with >=1 EXACT-timestamp match: 262
+vessels with >=1 +/-1h match: 264
+vessels with >=1 +/-2h match: 264
+
+OBSERVATION-COUNT BIAS CHECK:
+  correlation(n_observations_total, exact_min_distance_km) = -0.249
+  distance-bin counts are always paired with count-normalized fractions 
+  (frac_within_Xkm = n_within_Xkm / n_matches) specifically so vessels with more 
+  AIS records are not automatically treated as stronger evidence.
+
+MISSING-DATA POLICY:
+  coverage fractions are normalized by the FIXED candidate-timestamp count (72), 
+  never by the vessel's own observation count -- a vessel with fewer AIS reports 
+  simply has a lower coverage fraction, which is reported as missing information, 
+  never as an explicit penalty or negative evidence term.
+
+CIRCULAR-SHIFT EMPIRICAL NULL (requirement 5):
+  tested 260 vessels (>=2 exact-timestamp observations required)
+  vessels with empirical_p_value <= 0.10: 78 of 260 tested (descriptive flag ONLY -- NOT corrected for multiple testing, NOT a source probability)
+  method: exhaustive circular time-shift of each vessel's OWN real trajectory 
+  against the real candidate timeline -- see iste.ais_evidence module docstring 
+  for full method description and documented limitations.
+
+NO RANKING, NO AIS SCORE, NO SOURCE VESSEL CHOICE WAS PRODUCED BY THIS TASK.

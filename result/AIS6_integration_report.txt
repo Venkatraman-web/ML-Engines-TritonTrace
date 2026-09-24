@@ -1,0 +1,46 @@
+TASK AIS-6 -- AIS integration into T36 candidate score, report
+
+candidates scored: 271
+candidates with defined AIS evidence (real ais_source): 39 / 271
+
+INTEGRATION METHOD:
+  T36's own pre-existing 'ais_source' parameter and 'w_ais' reserved weight 
+  (iste/phase3_composite.py, UNCHANGED) were supplied a real iste.ais_source.
+  RealAISDataSource backed by the validated AIS-2 tracks. T35's own 
+  compute_ais_evidence (iste/phase3_ais.py) now implements its previously-
+  deferred real-data path -- AISDataSource/VesselTrackSegment/AISEvidence 
+  contracts are UNCHANGED. Support/Persistence/Convergence/Dispersion/
+  clustering/uncertainty formulas were NOT touched.
+
+CANDIDATE-LEVEL AIS EVIDENCE (independent of Support, per requirement 3):
+  spatial_evidence    = exp(-nearest_vessel_distance_km / 10km)
+  temporal_consistency = (n of 13 checked +/-6h offsets with a nearby vessel) / 13
+  ais_score = renormalized 50/50 mean of the two -- NEVER reuses AIS-5's own 
+  support_evidence dimension.
+
+BEFORE vs. WITH AIS COMPARISON:
+  top-10 overlap: 10/10
+  Spearman(score_before, score_with): +0.9804
+  mean |rank change|: 6.42, max |rank change|: 144
+  dominant cluster (before): cluster0000, 267 members
+  dominant cluster (with)  : cluster0000, 267 members
+  dominant-cluster membership overlap: 267
+  T37 cluster count unchanged: True
+
+OVERALL: AIS integration changes the candidate landscape MODESTLY on this real dataset (top-10 overlap=10/10, mean rank change=6.4).
+
+SENSITIVITY (requirement 8):
+  w_ais=0.10: top1=2019-06-12T04:35:58_cand000 overlap_vs_default=10 spearman=0.9942
+  w_ais=0.20 (default): top1=2019-06-12T04:35:58_cand000 overlap_vs_default=10 spearman=1.0
+  w_ais=0.30: top1=2019-06-12T04:35:58_cand000 overlap_vs_default=9 spearman=0.9998
+  ais_query_window=single_instant (n_available=17): top1=None overlap_vs_default=None spearman=None
+
+VALIDATION:
+  - no double-counting of Support: candidate-level AIS evidence never reads 
+    candidate.support_score or AIS-5's support_evidence (verified structurally 
+    in tests/test_phase3_ais.py)
+  - Stage III/T27-T39 physics/diagnostics: unchanged (T14-T34, T37, T38 never modified)
+  - AIS missingness: candidates with zero nearby AIS vessels get ais_score=None, 
+    renormalized away by T36's OWN existing, unmodified renormalize_weighted_mean
+  - AIS-5 vessel ranking preserved separately (AIS5_vessel_ranking.csv untouched)
+  - final candidate score remains an EVIDENCE-RANKING score, NOT a probability/certainty

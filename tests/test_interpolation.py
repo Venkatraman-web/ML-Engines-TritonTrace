@@ -229,7 +229,7 @@ class TestInterpolationAgainstRealData(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.ocean = load_field_dataset(
-            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
         cls.wind = load_field_dataset(
             WIND_PATH, ["u10", "v10"], time_dim="valid_time", lat_dim="latitude", lon_dim="longitude"
@@ -304,7 +304,7 @@ class TestNetCDFEnvironmentalFieldProvider(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.ocean = load_field_dataset(
-            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            OCEAN_PATH, ["uo", "vo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
         cls.provider = NetCDFEnvironmentalFieldProvider(cls.ocean)  # no K configured
 
@@ -418,7 +418,7 @@ class TestNetCDFEnvironmentalFieldProvider(unittest.TestCase):
 
     def test_constructor_requires_uo_and_vo(self):
         bad_source = load_field_dataset(
-            OCEAN_PATH, ["uo"], time_dim="time", lat_dim="latitude", lon_dim="longitude"
+            OCEAN_PATH, ["uo"], time_dim="time", lat_dim="lat", lon_dim="lon"
         )
         with self.assertRaises(ValueError):
             NetCDFEnvironmentalFieldProvider(bad_source)
