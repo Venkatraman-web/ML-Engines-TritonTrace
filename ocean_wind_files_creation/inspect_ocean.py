@@ -1,524 +1,453 @@
 from pathlib import Path
-
-import numpy as np
-import pandas as pd
 import xarray as xr
-
+import numpy as np
 
 # ============================================================
 # CONFIG
 # ============================================================
 
-OCEAN_FILE = Path(
-    "data/ocean_april2019_aoi_22_to_28.nc"
-)
+FILE = Path("./files/14th_june/ocean.nc")
+
+REQUIRED_VARS = ["uo", "vo"]
 
 
 # ============================================================
 # HELPERS
 # ============================================================
 
-def print_section(title):
-    print("\n" + "=" * 80)
-    print(title)
-    print("=" * 80)
-
-
-def find_coord(ds, names):
-    for name in names:
-        if name in ds.coords:
+def find_coord(ds, candidates):
+    for name in candidates:
+        if name in ds.coords or name in ds.variables:
             return name
-
-        if name in ds.variables:
-            return name
-
-    raise ValueError(
-        f"Could not find coordinate among {names}. "
-        f"Available coordinates: {list(ds.coords)}"
+    raise KeyError(
+        f"Could not find any of {candidates}. "
+        f"Available: {list(ds.variables)}"
     )
 
 
-def inspect_variable(ds, name):
-    if name not in ds:
-        print(f"\n{name}: MISSING")
-        return
+def print_range(ds, name):
+    values = ds[name].values
 
-    da = ds[name]
-
-    print(f"\n{name}")
-    print(f"  Dimensions : {da.dims}")
-    print(f"  Shape      : {da.shape}")
-    print(f"  Dtype      : {da.dtype}")
-
-    if da.attrs:
-        print("  Attributes :")
-        for key, value in da.attrs.items():
-            print(f"    {key}: {value}")
-
-    # Work with a small NumPy representation for diagnostics.
-    values = da.values
-
-    total = values.size
-
-    if total == 0:
-        print("  No values.")
-        return
-
-    nan_count = int(np.isnan(values).sum())
-
-    finite_count = int(
-        np.isfinite(values).sum()
+    print(
+        f"{name}: "
+        f"{np.nanmin(values)} -> {np.nanmax(values)}"
     )
-
-    print(f"  Total values       : {total:,}")
-    print(f"  NaN values         : {nan_count:,}")
-    print(f"  Finite values      : {finite_count:,}")
-
-    if finite_count > 0:
-
-        finite_values = values[
-            np.isfinite(values)
-        ]
-
-        print(
-            f"  Min                : "
-            f"{float(finite_values.min()):.10g}"
-        )
-
-        print(
-            f"  Max                : "
-            f"{float(finite_values.max()):.10g}"
-        )
-
-        print(
-            f"  Mean               : "
-            f"{float(finite_values.mean()):.10g}"
-        )
-
-        print(
-            f"  Std                : "
-            f"{float(finite_values.std()):.10g}"
-        )
 
 
 # ============================================================
-# MAIN
+# OPEN DATASET
 # ============================================================
 
-def main():
-
-    if not OCEAN_FILE.exists():
-        raise FileNotFoundError(
-            f"Ocean file not found:\n{OCEAN_FILE}"
-        )
-
-    print_section("OPENING OCEAN FILE")
-
-    print(f"File: {OCEAN_FILE.resolve()}")
-
-    ds = xr.open_dataset(OCEAN_FILE)
-
-    print("\nDataset:")
-    print(ds)
-
-    # ========================================================
-    # 1. DIMENSIONS
-    # ========================================================
-
-    print_section("DIMENSIONS")
-
-    for name, size in ds.sizes.items():
-        print(f"{name:15s}: {size}")
-
-    # ========================================================
-    # 2. COORDINATES
-    # ========================================================
-
-    print_section("COORDINATES")
-
-    lat_name = find_coord(
-        ds,
-        ["latitude", "lat", "nav_lat"]
+if not FILE.exists():
+    raise FileNotFoundError(
+        f"File not found: {FILE.resolve()}"
     )
 
-    lon_name = find_coord(
-        ds,
-        ["longitude", "lon", "nav_lon"]
+print("=" * 80)
+print("OPENING FILE")
+print("=" * 80)
+
+print("File:", FILE.resolve())
+
+ds = xr.open_dataset(
+    FILE,
+    decode_times=True
+)
+
+
+# ============================================================
+# BASIC DATASET INFO
+# ============================================================
+
+print("\n" + "=" * 80)
+print("DATASET")
+print("=" * 80)
+
+print(ds)
+
+
+# ============================================================
+# DIMENSIONS
+# ============================================================
+
+print("\n" + "=" * 80)
+print("DIMENSIONS")
+print("=" * 80)
+
+for dim, size in ds.sizes.items():
+    print(f"{dim:15s}: {size}")
+
+
+# ============================================================
+# COORDINATES
+# ============================================================
+
+print("\n" + "=" * 80)
+print("COORDINATES")
+print("=" * 80)
+
+for coord in ds.coords:
+    print(
+        f"{coord:15s}: "
+        f"shape={ds[coord].shape}, "
+        f"dtype={ds[coord].dtype}"
     )
 
-    print(f"Latitude coordinate : {lat_name}")
-    print(f"Longitude coordinate: {lon_name}")
 
-    # --------------------------------------------------------
-    # Latitude
-    # --------------------------------------------------------
+# ============================================================
+# FIND LAT / LON
+# ============================================================
 
-    lat = ds[lat_name].values
-    lon = ds[lon_name].values
+lat_name = find_coord(
+    ds,
+    ["latitude", "lat", "nav_lat"]
+)
 
-    print("\nLatitude:")
-    print(f"  Count      : {len(lat)}")
-    print(f"  First      : {lat[0]}")
-    print(f"  Last       : {lat[-1]}")
-    print(f"  Min        : {lat.min()}")
-    print(f"  Max        : {lat.max()}")
+lon_name = find_coord(
+    ds,
+    ["longitude", "lon", "nav_lon"]
+)
 
-    if len(lat) > 1:
-        lat_direction = (
-            "ascending"
-            if lat[0] < lat[-1]
-            else "descending"
-        )
+print("\nLatitude coordinate :", lat_name)
+print("Longitude coordinate:", lon_name)
 
-        print(f"  Direction  : {lat_direction}")
 
-        print(
-            f"  Step range : "
-            f"{np.diff(lat).min()} -> {np.diff(lat).max()}"
-        )
+# ============================================================
+# LAT / LON INFORMATION
+# ============================================================
 
-    # --------------------------------------------------------
-    # Longitude
-    # --------------------------------------------------------
+print("\n" + "=" * 80)
+print("SPATIAL GRID")
+print("=" * 80)
 
-    print("\nLongitude:")
-    print(f"  Count      : {len(lon)}")
-    print(f"  First      : {lon[0]}")
-    print(f"  Last       : {lon[-1]}")
-    print(f"  Min        : {lon.min()}")
-    print(f"  Max        : {lon.max()}")
+lat = ds[lat_name].values
+lon = ds[lon_name].values
 
-    if len(lon) > 1:
+print(
+    f"Latitude range : {float(np.min(lat)):.8f} "
+    f"-> {float(np.max(lat)):.8f}"
+)
 
-        lon_direction = (
-            "ascending"
-            if lon[0] < lon[-1]
-            else "descending"
-        )
+print(
+    f"Longitude range: {float(np.min(lon)):.8f} "
+    f"-> {float(np.max(lon)):.8f}"
+)
 
-        print(f"  Direction  : {lon_direction}")
+print(
+    "Latitude order :",
+    "ascending" if lat[0] < lat[-1] else "descending"
+)
 
-        print(
-            f"  Step range : "
-            f"{np.diff(lon).min()} -> {np.diff(lon).max()}"
-        )
+print(
+    "Longitude order:",
+    "ascending" if lon[0] < lon[-1] else "descending"
+)
 
-    # ========================================================
-    # 3. TIME
-    # ========================================================
 
-    print_section("TIME COVERAGE")
+# ============================================================
+# GRID SPACING
+# ============================================================
 
-    if "time" not in ds:
+print("\n" + "=" * 80)
+print("GRID SPACING")
+print("=" * 80)
 
-        raise RuntimeError(
-            "No 'time' coordinate found."
-        )
-
-    times = pd.to_datetime(
-        ds["time"].values
-    )
-
-    print(f"Count : {len(times)}")
-
-    print(f"First : {times[0]}")
-    print(f"Last  : {times[-1]}")
-
-    # --------------------------------------------------------
-    # Duplicate timestamp check
-    # --------------------------------------------------------
-
-    duplicated = times.duplicated()
+if len(lat) > 1:
+    lat_diff = np.diff(lat)
 
     print(
-        f"\nDuplicate timestamps: "
-        f"{int(duplicated.sum())}"
+        "Latitude spacing:"
+    )
+    print(
+        f"  min = {np.min(np.abs(lat_diff)):.10f}"
+    )
+    print(
+        f"  max = {np.max(np.abs(lat_diff)):.10f}"
     )
 
-    if duplicated.any():
-
-        print(
-            "Duplicates:"
-        )
-
-        for timestamp in times[duplicated]:
-            print(f"  {timestamp}")
-
-    # --------------------------------------------------------
-    # Time spacing
-    # --------------------------------------------------------
-
-    if len(times) > 1:
-
-        deltas = pd.Series(
-            times[1:] - times[:-1]
-        )
-
-        print("\nTime spacing:")
-
-        print(
-            deltas.value_counts()
-        )
-
-        expected = pd.Timedelta(
-            hours=1
-        )
-
-        bad = deltas[
-            deltas != expected
-        ]
-
-        print(
-            f"\nNon-1-hour intervals: "
-            f"{len(bad)}"
-        )
-
-        if len(bad) > 0:
-            print(bad)
-
-    # ========================================================
-    # 4. DATA VARIABLES
-    # ========================================================
-
-    print_section("DATA VARIABLES")
-
-    for name, da in ds.data_vars.items():
-
-        print(
-            f"{name:15s} "
-            f"dims={da.dims} "
-            f"shape={da.shape} "
-            f"dtype={da.dtype}"
-        )
-
-    # ========================================================
-    # 5. REQUIRED OCEAN VARIABLES
-    # ========================================================
-
-    print_section("REQUIRED VARIABLES: UO / VO")
-
-    inspect_variable(ds, "uo")
-    inspect_variable(ds, "vo")
-
-    for variable in ["uo", "vo"]:
-
-        if variable not in ds:
-            raise RuntimeError(
-                f"Required variable '{variable}' is missing."
-            )
-
-    # ========================================================
-    # 6. AOI EXTENT
-    # ========================================================
-
-    print_section("AOI EXTENT")
+if len(lon) > 1:
+    lon_diff = np.diff(lon)
 
     print(
-        f"Latitude : "
-        f"{float(ds[lat_name].min()):.8f} "
-        f"-> "
-        f"{float(ds[lat_name].max()):.8f}"
+        "Longitude spacing:"
     )
-
     print(
-        f"Longitude: "
-        f"{float(ds[lon_name].min()):.8f} "
-        f"-> "
-        f"{float(ds[lon_name].max()):.8f}"
+        f"  min = {np.min(np.abs(lon_diff)):.10f}"
+    )
+    print(
+        f"  max = {np.max(np.abs(lon_diff)):.10f}"
     )
 
-    # ========================================================
-    # 7. MISSING / FILL VALUES
-    # ========================================================
 
-    print_section("MISSING / FILL VALUE INSPECTION")
+# ============================================================
+# TIME INFORMATION
+# ============================================================
 
-    for variable in ["uo", "vo"]:
+print("\n" + "=" * 80)
+print("TIME")
+print("=" * 80)
 
-        da = ds[variable]
+times = ds["time"].values
 
-        print(f"\n{variable}")
+print("Number of timestamps:", len(times))
 
-        for attr in [
-            "_FillValue",
-            "missing_value",
-            "valid_min",
-            "valid_max",
-        ]:
-            if attr in da.attrs:
-                print(
-                    f"  {attr}: "
-                    f"{da.attrs[attr]}"
-                )
+print("First timestamp:", times[0])
+print("Last timestamp :", times[-1])
 
-        values = da.values
+if len(times) > 1:
 
-        # Check huge suspicious values.
-        suspicious = np.abs(values) > 100
-
-        print(
-            f"  |value| > 100 m/s: "
-            f"{int(suspicious.sum()):,}"
-        )
-
-        # Check values around the known NetCDF fill-value region.
-        huge = np.abs(values) > 1e10
-
-        print(
-            f"  |value| > 1e10 : "
-            f"{int(huge.sum()):,}"
-        )
-
-    # ========================================================
-    # 8. FINITE / VALIDITY SUMMARY
-    # ========================================================
-
-    print_section("FINITE DATA SUMMARY")
-
-    for variable in ["uo", "vo"]:
-
-        values = ds[variable].values
-
-        finite = np.isfinite(values)
-
-        total = values.size
-        finite_count = int(finite.sum())
-
-        print(
-            f"{variable}: "
-            f"{finite_count:,}/{total:,} "
-            f"finite "
-            f"({100 * finite_count / total:.4f}%)"
-        )
-
-    # ========================================================
-    # 9. SAMPLE VALUES
-    # ========================================================
-
-    print_section("SAMPLE OCEAN-CURRENT VALUES")
-
-    # First time, middle time, last time
-    sample_indices = sorted(
-        set([
-            0,
-            len(times) // 2,
-            len(times) - 1,
-        ])
+    time_diffs = np.diff(
+        times.astype("datetime64[s]")
     )
 
-    for index in sample_indices:
+    unique_diffs = np.unique(time_diffs)
 
-        print(
-            f"\nTimestamp: {times[index]}"
-        )
+    print("\nUnique time intervals:")
 
-        u = ds["uo"].isel(
-            time=index
-        ).values
+    for diff in unique_diffs:
+        print(" ", diff)
 
-        v = ds["vo"].isel(
-            time=index
-        ).values
-
-        valid = (
-            np.isfinite(u)
-            & np.isfinite(v)
-        )
-
-        if valid.any():
-
-            speed = np.sqrt(
-                u[valid] ** 2
-                + v[valid] ** 2
-            )
-
-            print(
-                f"  uo mean   : "
-                f"{float(u[valid].mean()):.6f} m/s"
-            )
-
-            print(
-                f"  vo mean   : "
-                f"{float(v[valid].mean()):.6f} m/s"
-            )
-
-            print(
-                f"  speed mean: "
-                f"{float(speed.mean()):.6f} m/s"
-            )
-
-            print(
-                f"  speed max : "
-                f"{float(speed.max()):.6f} m/s"
-            )
-
-    # ========================================================
-    # 10. DATASET ATTRIBUTES
-    # ========================================================
-
-    print_section("DATASET ATTRIBUTES")
-
-    if ds.attrs:
-
-        for key, value in ds.attrs.items():
-            print(
-                f"{key}: {value}"
-            )
-
+    # Check strict ordering
+    if np.all(
+        time_diffs > np.timedelta64(0, "s")
+    ):
+        print("\n✅ Time axis is strictly increasing.")
     else:
+        print("\n❌ Time axis is NOT strictly increasing.")
 
-        print(
-            "No global dataset attributes."
-        )
 
-    # ========================================================
-    # 11. FINAL CHECKS
-    # ========================================================
+# ============================================================
+# VARIABLE INFORMATION
+# ============================================================
 
-    print_section("FINAL CHECKS")
+print("\n" + "=" * 80)
+print("VARIABLES")
+print("=" * 80)
 
-    checks = {}
+for var_name in ds.data_vars:
 
-    checks["uo_present"] = "uo" in ds
-    checks["vo_present"] = "vo" in ds
-    checks["time_present"] = "time" in ds
-    checks["latitude_present"] = lat_name in ds
-    checks["longitude_present"] = lon_name in ds
-    checks["duplicate_times"] = not duplicated.any()
+    var = ds[var_name]
 
-    if len(times) > 1:
+    print(f"\n[{var_name}]")
 
-        checks["hourly_spacing"] = bool(
-            np.all(
-                np.diff(times.values)
-                == np.timedelta64(1, "h")
-            )
-        )
+    print("  dimensions :", var.dims)
+    print("  shape      :", var.shape)
+    print("  dtype      :", var.dtype)
 
+    if "units" in var.attrs:
+        print("  units      :", var.attrs["units"])
+
+    if "long_name" in var.attrs:
+        print("  long_name  :", var.attrs["long_name"])
+
+
+# ============================================================
+# REQUIRED VARIABLE CHECK
+# ============================================================
+
+print("\n" + "=" * 80)
+print("REQUIRED VARIABLES")
+print("=" * 80)
+
+for var_name in REQUIRED_VARS:
+
+    if var_name not in ds.data_vars:
+        print(f"❌ {var_name} missing")
     else:
+        print(f"✅ {var_name} present")
 
-        checks["hourly_spacing"] = True
 
-    for name, result in checks.items():
+# ============================================================
+# VALUE STATISTICS
+# ============================================================
 
-        print(
-            f"  {'PASS' if result else 'FAIL'} "
-            f"{name}"
-        )
+print("\n" + "=" * 80)
+print("VALUE STATISTICS")
+print("=" * 80)
 
-    all_pass = all(checks.values())
+for var_name in REQUIRED_VARS:
+
+    if var_name not in ds:
+        continue
+
+    data = ds[var_name].values
+
+    finite = np.isfinite(data)
+
+    finite_values = data[finite]
+
+    print(f"\n[{var_name}]")
 
     print(
-        "\nOverall basic inspection: "
-        f"{'PASS' if all_pass else 'CHECK REQUIRED'}"
+        f"  min       : {np.min(finite_values):.8f}"
     )
 
-    ds.close()
+    print(
+        f"  max       : {np.max(finite_values):.8f}"
+    )
+
+    print(
+        f"  mean      : {np.mean(finite_values):.8f}"
+    )
+
+    print(
+        f"  median    : {np.median(finite_values):.8f}"
+    )
+
+    print(
+        f"  NaN count : {np.isnan(data).sum()}"
+    )
+
+    print(
+        f"  Inf count : {np.isinf(data).sum()}"
+    )
+
+    print(
+        f"  finite %  : "
+        f"{100 * finite.mean():.4f}%"
+    )
 
 
 # ============================================================
-# ENTRY POINT
+# NaN MAP PER TIMESTAMP
 # ============================================================
 
-if __name__ == "__main__":
-    main()
+print("\n" + "=" * 80)
+print("NAN COUNTS PER TIMESTAMP")
+print("=" * 80)
+
+for var_name in REQUIRED_VARS:
+
+    if var_name not in ds:
+        continue
+
+    print(f"\n[{var_name}]")
+
+    for i, timestamp in enumerate(times):
+
+        data = ds[var_name].isel(time=i).values
+
+        nan_count = np.isnan(data).sum()
+
+        print(
+            f"{timestamp} : "
+            f"{nan_count} NaNs"
+        )
+
+
+# ============================================================
+# SAMPLE VALUES
+# ============================================================
+
+print("\n" + "=" * 80)
+print("SAMPLE VALUES")
+print("=" * 80)
+
+sample_time_indices = [
+    0,
+    len(times) // 2,
+    len(times) - 1
+]
+
+sample_lat_indices = [
+    0,
+    len(lat) // 2,
+    len(lat) - 1
+]
+
+sample_lon_indices = [
+    0,
+    len(lon) // 2,
+    len(lon) - 1
+]
+
+for ti in sample_time_indices:
+
+    print(f"\nTime: {times[ti]}")
+
+    for yi in sample_lat_indices:
+
+        for xi in sample_lon_indices:
+
+            lat_value = lat[yi]
+            lon_value = lon[xi]
+
+            u_value = ds["uo"].isel(
+                time=ti,
+                **{
+                    lat_name: yi,
+                    lon_name: xi
+                }
+            ).item()
+
+            v_value = ds["vo"].isel(
+                time=ti,
+                **{
+                    lat_name: yi,
+                    lon_name: xi
+                }
+            ).item()
+
+            print(
+                f"  lat={lat_value:.6f}, "
+                f"lon={lon_value:.6f} | "
+                f"uo={u_value} | "
+                f"vo={v_value}"
+            )
+
+
+# ============================================================
+# DATASET ATTRIBUTES
+# ============================================================
+
+print("\n" + "=" * 80)
+print("GLOBAL ATTRIBUTES")
+print("=" * 80)
+
+for key, value in ds.attrs.items():
+    print(f"{key}: {value}")
+
+
+# ============================================================
+# FINAL SUMMARY
+# ============================================================
+
+print("\n" + "=" * 80)
+print("FINAL SUMMARY")
+print("=" * 80)
+
+print(f"File       : {FILE.name}")
+print(f"Timestamps : {len(times)}")
+print(
+    f"Grid       : "
+    f"{len(lat)} × {len(lon)}"
+)
+
+print(
+    f"Latitude   : "
+    f"{lat.min():.6f} -> {lat.max():.6f}"
+)
+
+print(
+    f"Longitude  : "
+    f"{lon.min():.6f} -> {lon.max():.6f}"
+)
+
+print(
+    f"Time       : "
+    f"{times[0]} -> {times[-1]}"
+)
+
+print(
+    f"Variables  : "
+    f"{list(ds.data_vars)}"
+)
+
+
+# ============================================================
+# CLOSE
+# ============================================================
+
+ds.close()
+
+print("\n✅ Inspection complete.")

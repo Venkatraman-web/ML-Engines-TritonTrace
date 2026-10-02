@@ -1,326 +1,471 @@
 from pathlib import Path
 import xarray as xr
-
+import numpy as np
 
 # ============================================================
 # CONFIG
 # ============================================================
 
-INPUT_DIR = Path("ocean_file_raw")
+INPUT_DIR = Path("./ocean_file_raw")
 
-OUTPUT_FILE = Path("data/ocean_april2019_aoi_22_to_28.nc")
+OUTPUT_FILE = Path("./files/14th_june/ocean.nc")
 
-# SAME AOI USED IN THE PREVIOUS CASE
-# AOI = [north, west, south, east]
+# Existing common Ocean + Wind AOI
 NORTH = 36.372
-WEST = 27.121
+WEST  = 27.121
 SOUTH = 30.1875
-EAST = 36.088
+EAST  = 36.088
 
-# April 22 -> April 28, 2019
 DATES = [
-    "20190422",
-    "20190423",
-    "20190424",
-    "20190425",
-    "20190426",
-    "20190427",
-    "20190428",
+    "20190614",
+    "20190615",
+    "20190616",
+    "20190617",
 ]
 
-FILENAME_TEMPLATE = (
-    "{date}_h-CMCC--RFVL-MFSe3r1-MED-"
-    "b20200901_re-sv01.00.nc"
-)
+REQUIRED_VARS = ["uo", "vo"]
+
+EXPECTED_TIMESTAMPS = 96   # 4 days × 24 hours
 
 
 # ============================================================
 # HELPERS
 # ============================================================
 
-def find_coord(ds, names):
-    """
-    Find the coordinate name used by the NetCDF file.
-    """
-    for name in names:
-        if name in ds.coords:
+def find_coord(ds, candidates):
+    """Find the first coordinate/variable matching the candidates."""
+    for name in candidates:
+        if name in ds.coords or name in ds.variables:
             return name
 
-        if name in ds.variables:
-            return name
-
-    raise ValueError(
-        f"Could not find coordinate among {names}. "
-        f"Available coords: {list(ds.coords)}"
+    raise KeyError(
+        f"Could not find any of {candidates}. "
+        f"Available variables: {list(ds.variables)}"
     )
 
 
-def make_lat_slice(lat):
+def make_slice(coord, lower, upper):
     """
-    Create correct latitude slice regardless of coordinate direction.
+    Create a coordinate slice that works for both
+    ascending and descending coordinates.
     """
-    if lat.values[0] < lat.values[-1]:
-        return slice(SOUTH, NORTH)
+    values = coord.values
 
-    return slice(NORTH, SOUTH)
+    if values[0] < values[-1]:
+        return slice(lower, upper)
 
-
-def make_lon_slice(lon):
-    """
-    Create correct longitude slice regardless of coordinate direction.
-    """
-    if lon.values[0] < lon.values[-1]:
-        return slice(WEST, EAST)
-
-    return slice(EAST, WEST)
+    return slice(upper, lower)
 
 
 # ============================================================
-# MAIN
+# FIND FILES
 # ============================================================
 
-def main():
+all_files = sorted(INPUT_DIR.glob("*.nc"))
 
-    INPUT_DIR.mkdir(parents=True, exist_ok=True)
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+if not all_files:
+    raise FileNotFoundError(
+        f"No NetCDF files found in {INPUT_DIR.resolve()}"
+    )
 
-    # --------------------------------------------------------
-    # 1. Locate files
-    # --------------------------------------------------------
+print("Available NetCDF files:")
+for file_path in all_files:
+    print("   ", file_path.name)
 
-    files = []
 
-    for date in DATES:
+# ============================================================
+# SELECT ONE FILE FOR EACH DATE
+# ============================================================
 
-        filename = FILENAME_TEMPLATE.format(date=date)
-        path = INPUT_DIR / filename
+selected_files = []
 
-        if not path.exists():
-            raise FileNotFoundError(
-                f"Missing required file:\n{path}"
-            )
+for date in DATES:
 
-        files.append(path)
+    matches = [
+        file_path
+        for file_path in all_files
+        if date in file_path.name
+    ]
 
-    print("=" * 70)
-    print("FILES TO PROCESS")
-    print("=" * 70)
-
-    for path in files:
-        print(path)
-
-    # --------------------------------------------------------
-    # 2. Open first file to identify coordinates
-    # --------------------------------------------------------
-
-    with xr.open_dataset(files[0]) as first_ds:
-
-        lat_name = find_coord(
-            first_ds,
-            ["latitude", "lat", "nav_lat"]
+    if len(matches) == 0:
+        raise FileNotFoundError(
+            f"No NetCDF file found for date {date}"
         )
 
-        lon_name = find_coord(
-            first_ds,
-            ["longitude", "lon", "nav_lon"]
+    if len(matches) > 1:
+        print(f"\nWARNING: Multiple files found for {date}")
+
+        for match in matches:
+            print("   ", match.name)
+
+        raise RuntimeError(
+            f"Ambiguous file selection for {date}. "
+            f"Please keep only one file for this date."
         )
 
-        print("\nDetected coordinates:")
-        print(f"Latitude : {lat_name}")
-        print(f"Longitude: {lon_name}")
+    selected_files.append(matches[0])
 
-        # Confirm required ocean-current variables
-        for variable in ["uo", "vo"]:
 
-            if variable not in first_ds.data_vars:
-                raise ValueError(
-                    f"Required variable '{variable}' "
-                    f"not found in {files[0]}"
-                )
+print("\nSelected files:")
+for file_path in selected_files:
+    print("   ", file_path.name)
 
-        lat_slice = make_lat_slice(
-            first_ds[lat_name]
-        )
 
-        lon_slice = make_lon_slice(
-            first_ds[lon_name]
-        )
+# ============================================================
+# OPEN + AOI FILTER EACH FILE
+# ============================================================
 
-    # --------------------------------------------------------
-    # 3. Open all seven files lazily
-    # --------------------------------------------------------
+filtered_datasets = []
 
-    print("\nOpening daily NetCDF files...")
+for file_path in selected_files:
 
-    datasets = []
+    print("\n" + "=" * 60)
+    print(f"Processing: {file_path.name}")
 
-    for path in files:
-
-        ds = xr.open_dataset(path)
-
-        # Filter to SAME AOI before concatenation
-        ds = ds.sel(
-            {
-                lat_name: lat_slice,
-                lon_name: lon_slice,
-            }
-        )
-
-        datasets.append(ds)
-
-        print(
-            f"  {path.name}: "
-            f"{dict(ds.sizes)}"
-        )
-
-    # --------------------------------------------------------
-    # 4. Concatenate along time
-    # --------------------------------------------------------
-
-    print("\nConcatenating along time...")
-
-    combined = xr.concat(
-        datasets,
-        dim="time",
-        data_vars="all",
-        coords="minimal",
-        compat="override",
-        join="exact",
+    ds = xr.open_dataset(
+        file_path,
+        decode_times=True
     )
 
     # --------------------------------------------------------
-    # 5. Sort and remove duplicate timestamps
+    # REQUIRED VARIABLES
     # --------------------------------------------------------
 
-    combined = combined.sortby("time")
+    missing = [
+        var
+        for var in REQUIRED_VARS
+        if var not in ds.data_vars
+    ]
 
-    time_values = combined["time"].values
-
-    if len(time_values) != len(set(time_values)):
-
-        print(
-            "Duplicate timestamps detected. "
-            "Removing duplicates..."
-        )
-
-        import numpy as np
-
-        _, unique_indices = np.unique(
-            time_values,
-            return_index=True,
-        )
-
-        unique_indices = sorted(unique_indices)
-
-        combined = combined.isel(
-            time=unique_indices
-        )
-
-    # --------------------------------------------------------
-    # 6. Validate expected time coverage
-    # --------------------------------------------------------
-
-    print("\n" + "=" * 70)
-    print("TIME VALIDATION")
-    print("=" * 70)
-
-    print(
-        "First timestamp:",
-        combined.time.values[0]
-    )
-
-    print(
-        "Last timestamp :",
-        combined.time.values[-1]
-    )
-
-    print(
-        "Number of timestamps:",
-        combined.sizes["time"]
-    )
-
-    # April 22-28 inclusive = 168 hourly timestamps
-    if combined.sizes["time"] != 168:
-
-        print(
-            "\nWARNING:"
-            f" expected approximately 168 hourly timestamps, "
-            f"found {combined.sizes['time']}."
-        )
-
-    # --------------------------------------------------------
-    # 7. Validate AOI
-    # --------------------------------------------------------
-
-    print("\n" + "=" * 70)
-    print("AOI VALIDATION")
-    print("=" * 70)
-
-    actual_lat_min = float(
-        combined[lat_name].min()
-    )
-
-    actual_lat_max = float(
-        combined[lat_name].max()
-    )
-
-    actual_lon_min = float(
-        combined[lon_name].min()
-    )
-
-    actual_lon_max = float(
-        combined[lon_name].max()
-    )
-
-    print(
-        f"Latitude : {actual_lat_min:.6f} -> "
-        f"{actual_lat_max:.6f}"
-    )
-
-    print(
-        f"Longitude: {actual_lon_min:.6f} -> "
-        f"{actual_lon_max:.6f}"
-    )
-
-    # --------------------------------------------------------
-    # 8. Validate required variables
-    # --------------------------------------------------------
-
-    print("\nRequired variables:")
-
-    for variable in ["uo", "vo"]:
-
-        print(
-            f"  {variable}: "
-            f"{combined[variable].dims}, "
-            f"{combined[variable].dtype}"
-        )
-
-    # --------------------------------------------------------
-    # 9. Save
-    # --------------------------------------------------------
-
-    print("\nSaving combined AOI NetCDF...")
-
-    combined.to_netcdf(
-        OUTPUT_FILE,
-        format="NETCDF4",
-    )
-
-    # Close all open datasets
-    combined.close()
-
-    for ds in datasets:
+    if missing:
         ds.close()
 
-    print("\n" + "=" * 70)
-    print("DONE")
-    print("=" * 70)
+        raise KeyError(
+            f"{file_path.name} is missing variables: {missing}"
+        )
+
+    # --------------------------------------------------------
+    # FIND LAT / LON
+    # --------------------------------------------------------
+
+    lat_name = find_coord(
+        ds,
+        ["latitude", "lat", "nav_lat"]
+    )
+
+    lon_name = find_coord(
+        ds,
+        ["longitude", "lon", "nav_lon"]
+    )
+
+    print(f"Latitude coordinate : {lat_name}")
+    print(f"Longitude coordinate: {lon_name}")
 
     print(
-        f"Output: {OUTPUT_FILE.resolve()}"
+        f"Original latitude range : "
+        f"{float(ds[lat_name].min()):.6f} -> "
+        f"{float(ds[lat_name].max()):.6f}"
+    )
+
+    print(
+        f"Original longitude range: "
+        f"{float(ds[lon_name].min()):.6f} -> "
+        f"{float(ds[lon_name].max()):.6f}"
+    )
+
+    # --------------------------------------------------------
+    # TIME INFO
+    # --------------------------------------------------------
+
+    print(
+        f"Time range: "
+        f"{ds.time.values[0]} -> "
+        f"{ds.time.values[-1]}"
+    )
+
+    print(
+        f"Number of timestamps: "
+        f"{ds.sizes.get('time', 0)}"
+    )
+
+    # --------------------------------------------------------
+    # AOI SLICES
+    # --------------------------------------------------------
+
+    lat_slice = make_slice(
+        ds[lat_name],
+        SOUTH,
+        NORTH
+    )
+
+    lon_slice = make_slice(
+        ds[lon_name],
+        WEST,
+        EAST
+    )
+
+    # --------------------------------------------------------
+    # APPLY AOI FILTER
+    # --------------------------------------------------------
+
+    ds_filtered = ds.sel({
+        lat_name: lat_slice,
+        lon_name: lon_slice
+    })
+
+    # Keep only ocean current variables
+    ds_filtered = ds_filtered[REQUIRED_VARS]
+
+    # Load into memory before closing source dataset
+    ds_filtered = ds_filtered.load()
+
+    ds.close()
+
+    # --------------------------------------------------------
+    # VALIDATE AOI RESULT
+    # --------------------------------------------------------
+
+    lat_count = ds_filtered.sizes.get(lat_name, 0)
+    lon_count = ds_filtered.sizes.get(lon_name, 0)
+
+    if lat_count == 0:
+        raise ValueError(
+            f"No latitude points remain after AOI filtering "
+            f"for {file_path.name}"
+        )
+
+    if lon_count == 0:
+        raise ValueError(
+            f"No longitude points remain after AOI filtering "
+            f"for {file_path.name}"
+        )
+
+    print(
+        f"Filtered grid: "
+        f"{lat_count} lat × {lon_count} lon"
+    )
+
+    filtered_datasets.append(ds_filtered)
+
+
+# ============================================================
+# VERIFY GRID CONSISTENCY
+# ============================================================
+
+reference = filtered_datasets[0]
+
+lat_name = find_coord(
+    reference,
+    ["latitude", "lat", "nav_lat"]
+)
+
+lon_name = find_coord(
+    reference,
+    ["longitude", "lon", "nav_lon"]
+)
+
+for i, ds in enumerate(
+    filtered_datasets[1:],
+    start=2
+):
+
+    current_lat_name = find_coord(
+        ds,
+        ["latitude", "lat", "nav_lat"]
+    )
+
+    current_lon_name = find_coord(
+        ds,
+        ["longitude", "lon", "nav_lon"]
+    )
+
+    if not np.array_equal(
+        reference[lat_name].values,
+        ds[current_lat_name].values
+    ):
+        raise ValueError(
+            f"Latitude grid differs in file {i}"
+        )
+
+    if not np.array_equal(
+        reference[lon_name].values,
+        ds[current_lon_name].values
+    ):
+        raise ValueError(
+            f"Longitude grid differs in file {i}"
+        )
+
+
+print("\n✅ All four files use the same spatial grid.")
+
+
+# ============================================================
+# CONCATENATE
+# ============================================================
+
+print("\nCombining datasets...")
+
+combined = xr.concat(
+    filtered_datasets,
+    dim="time",
+    data_vars="all",
+    coords="minimal",
+    compat="override",
+    join="exact"
+)
+
+
+# ============================================================
+# SORT TIME
+# ============================================================
+
+combined = combined.sortby("time")
+
+
+# ============================================================
+# REMOVE DUPLICATE TIMESTAMPS
+# ============================================================
+
+time_values = combined["time"].values
+
+_, unique_indices = np.unique(
+    time_values,
+    return_index=True
+)
+
+unique_indices = np.sort(unique_indices)
+
+combined = combined.isel(
+    time=unique_indices
+)
+
+
+# ============================================================
+# VALIDATION
+# ============================================================
+
+print("\n" + "=" * 60)
+print("FINAL VALIDATION")
+print("=" * 60)
+
+print(
+    "Time:",
+    combined.time.values[0],
+    "->",
+    combined.time.values[-1]
+)
+
+print(
+    "Number of timestamps:",
+    combined.sizes["time"]
+)
+
+print(
+    "Latitude:",
+    float(combined[lat_name].min()),
+    "->",
+    float(combined[lat_name].max())
+)
+
+print(
+    "Longitude:",
+    float(combined[lon_name].min()),
+    "->",
+    float(combined[lon_name].max())
+)
+
+print(
+    "Variables:",
+    list(combined.data_vars)
+)
+
+
+# ------------------------------------------------------------
+# TIMESTAMP COUNT
+# ------------------------------------------------------------
+
+if combined.sizes["time"] != EXPECTED_TIMESTAMPS:
+    raise ValueError(
+        f"Expected {EXPECTED_TIMESTAMPS} timestamps "
+        f"but got {combined.sizes['time']}"
     )
 
 
-if __name__ == "__main__":
-    main()
+# ------------------------------------------------------------
+# AOI VALIDATION
+# ------------------------------------------------------------
+
+lat_min = float(combined[lat_name].min())
+lat_max = float(combined[lat_name].max())
+
+lon_min = float(combined[lon_name].min())
+lon_max = float(combined[lon_name].max())
+
+if lat_min < SOUTH or lat_max > NORTH:
+    raise ValueError(
+        "Latitude AOI validation failed."
+    )
+
+if lon_min < WEST or lon_max > EAST:
+    raise ValueError(
+        "Longitude AOI validation failed."
+    )
+
+
+# ------------------------------------------------------------
+# TIME ORDER / DUPLICATES
+# ------------------------------------------------------------
+
+if not np.all(
+    np.diff(
+        combined.time.values.astype("datetime64[s]")
+    ) > np.timedelta64(0, "s")
+):
+    raise ValueError(
+        "Time axis is not strictly increasing."
+    )
+
+
+# ------------------------------------------------------------
+# CHECK NaNs
+# ------------------------------------------------------------
+
+for var in REQUIRED_VARS:
+
+    nan_count = int(
+        combined[var].isnull().sum().values
+    )
+
+    print(
+        f"{var} NaN values: {nan_count}"
+    )
+
+
+# ============================================================
+# SAVE
+# ============================================================
+
+print("\nSaving:")
+print(OUTPUT_FILE.resolve())
+
+combined.to_netcdf(
+    OUTPUT_FILE,
+    format="NETCDF4"
+)
+
+
+# ============================================================
+# DONE
+# ============================================================
+
+print("\n" + "=" * 60)
+print("✅ DONE")
+print("=" * 60)
+
+print(
+    f"Output file:\n"
+    f"{OUTPUT_FILE.resolve()}"
+)
+
+print("\nFinal dataset:")
+print(combined)
