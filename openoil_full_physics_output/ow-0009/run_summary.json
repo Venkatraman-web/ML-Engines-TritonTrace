@@ -1,0 +1,63 @@
+{
+  "case_id": "ow-0009",
+  "model": "Real OpenOil/OpenDrift (opendrift==1.14.11), NOT this project's own locked model",
+  "generated_at_utc": "2026-09-25T19:48:07+00:00",
+  "deterministic": false,
+  "random_seed": 20260926,
+  "experiment": {
+    "start_time_utc": "2019-04-28T15:38:41",
+    "end_time_utc": "2019-05-01T15:38:41",
+    "duration_hours": 72,
+    "recorded_states": 73,
+    "initial_parcel_count": 371
+  },
+  "physics": {
+    "wind_drift_factor": 0.03,
+    "current_drift_factor": 1.0,
+    "weathering": "ON (OpenOil defaults: evaporation, emulsification, dispersion)",
+    "biodegradation": "OFF (OpenOil default)",
+    "horizontal_diffusivity_m2s": 10.0,
+    "current_uncertainty": "OpenOil default (0.05)",
+    "wind_uncertainty": "OpenOil default (0.5)",
+    "vertical_mixing": "ON (OpenOil default)",
+    "coastline": "real GSHHG coastline (OpenOil default 'stranding'), not this project's CMEMS-mask proxy",
+    "stokes_drift": "nominally True (OpenOil default) but functionally inert -- no wave reader attached"
+  },
+  "mass_budget": {
+    "total_seeded_kg": 88715.45,
+    "final_mass_oil_kg": 79246.41,
+    "final_mass_evaporated_kg": 4577.49,
+    "final_mass_dispersed_kg": 4891.56,
+    "final_mass_biodegraded_kg": 0.0
+  },
+  "final_state": {
+    "moving_count": 371,
+    "stopped_count": 0
+  },
+  "hotspots": {
+    "triggered_hotspots": [
+      "Beirut Port",
+      "Cape Greco MPA",
+      "Palm Islands Nature Reserve"
+    ],
+    "critical_hotspots": [
+      "Cape Greco MPA"
+    ]
+  },
+  "outputs": {
+    "trajectory": "openoil_full_physics_output/ow-0009/trajectory.parquet",
+    "hotspot_alerts": "openoil_full_physics_output/ow-0009/hotspot_alerts.parquet",
+    "animation_mp4": "openoil_full_physics_output/ow-0009/openoil_full_physics_ow0009_animation.mp4",
+    "representative_frames": [
+      "openoil_full_physics_output/ow-0009/frames/initial.png",
+      "openoil_full_physics_output/ow-0009/frames/final.png",
+      "openoil_full_physics_output/ow-0009/frames/watch_beirut_port.png",
+      "openoil_full_physics_output/ow-0009/frames/critical_cape_greco_mpa.png"
+    ]
+  },
+  "notes": [
+    "This is a SEPARATE exploratory deliverable using the real OpenOil/OpenDrift engine with weathering and diffusion enabled -- it does NOT replace or modify this project's own locked, from-scratch, deterministic model under output/.",
+    "Non-deterministic by nature (diffusion + current/wind uncertainty); reproducible only because a fixed random_seed was passed to OpenOil.",
+    "Per-parcel mass_kg heterogeneity is not individually preserved -- OpenOil has no concept of per-element user-supplied mass (confirmed from its own source: mass_oil is marked 'seed': False and unconditionally recomputed during seeding). The real TOTAL observed mass (sum of all parcels' mass_kg) was seeded correctly and verified numerically, then split equally across parcels and weathered realistically from there."
+  ]
+}

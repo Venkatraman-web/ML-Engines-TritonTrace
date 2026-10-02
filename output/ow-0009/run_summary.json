@@ -1,0 +1,123 @@
+{
+  "case_id": "ow-0009",
+  "generated_at_utc": "2026-09-25T08:49:04+00:00",
+  "experiment": {
+    "start_time_utc": "2019-04-28T15:38:41",
+    "end_time_utc": "2019-05-01T15:38:41",
+    "duration_hours": 72,
+    "timestep_hours": 1,
+    "recorded_states": 73,
+    "initial_parcel_count": 371
+  },
+  "forcing": {
+    "ocean": {
+      "source": "CMEMS",
+      "file": "data/28th_april/ocean.nc",
+      "variables": [
+        "uo",
+        "vo"
+      ]
+    },
+    "wind": {
+      "source": "ERA5",
+      "file": "data/28th_april/wind.nc",
+      "variables": [
+        "u10",
+        "v10"
+      ]
+    }
+  },
+  "physics": {
+    "formula": "u_oil = current_drift_factor*uo + wind_drift_factor*u10; v_oil = current_drift_factor*vo + wind_drift_factor*v10",
+    "current_drift_factor": 1.0,
+    "wind_drift_factor": 0.03,
+    "stokes_drift": false,
+    "weathering": false,
+    "advection_scheme": "euler"
+  },
+  "nan_coastline_policy": {
+    "modes": [
+      "DIRECT",
+      "NEIGHBOR_FALLBACK",
+      "INVALID_ENVIRONMENT",
+      "LAND_STRANDED",
+      "ALREADY_STRANDED"
+    ],
+    "fallback": "3x3 then 5x5 inverse-distance-weighted valid-ocean neighbors, minimum 4 valid neighbors, weight=1/(d^2+epsilon)",
+    "land_source": "static CMEMS uo/vo NaN mask (verified time-invariant across all 96 forcing timesteps)"
+  },
+  "hotspots": {
+    "geojson": "regional_alert_geofences_wide.geojson",
+    "hotspot_count": 11,
+    "watch_km": 100,
+    "critical_km": 40,
+    "logic": "(active particles inside critical polygon)/(active particles) >= 30% -> CRITICAL; elif (.../active) >= 30% of watch polygon -> WATCH; else CLEAR (user-directed change, post-F07, from the originally locked 'any particle' rule)",
+    "min_fraction_critical": 0.3,
+    "min_fraction_watch": 0.3,
+    "triggered_hotspots": [
+      "Beirut Port",
+      "Cape Greco MPA",
+      "Palm Islands Nature Reserve"
+    ],
+    "critical_hotspots": [
+      "Cape Greco MPA"
+    ],
+    "cape_greco_first_critical_time_utc": "2019-04-30T18:38:41",
+    "cape_greco_min_distance_km": 23.878,
+    "cape_greco_max_fraction_in_critical_zone": 1.0
+  },
+  "outputs": {
+    "trajectory": "output/ow-0009/trajectory.parquet",
+    "hourly_diagnostics": "output/ow-0009/hourly_diagnostics.parquet",
+    "hotspot_alerts": "output/ow-0009/hotspot_alerts.parquet",
+    "animation_mp4": "output/ow-0009/ow0009_forward_animation.mp4",
+    "representative_frames": [
+      "output/ow-0009/frames/initial.png",
+      "output/ow-0009/frames/watch.png",
+      "output/ow-0009/frames/critical_cape_greco.png",
+      "output/ow-0009/frames/final.png"
+    ],
+    "openoil_reference": "output/ow-0009/openoil_reference.parquet",
+    "openoil_comparison": "output/ow-0009/openoil_comparison.parquet"
+  },
+  "final_state": {
+    "active_count": 371,
+    "stranded_count": 0
+  },
+  "openoil_validation": {
+    "checkpoints_hours": [
+      1,
+      6,
+      12,
+      24,
+      48,
+      72
+    ],
+    "mean_error_km": [
+      0.0009,
+      0.0053,
+      0.0096,
+      0.0379,
+      0.0996,
+      0.2008
+    ],
+    "max_error_km": [
+      0.0024,
+      0.0131,
+      0.0213,
+      0.0632,
+      0.1524,
+      0.6453
+    ],
+    "verdict": "ACCEPTABLE",
+    "primary_residual_cause": "spherical-Earth displacement approximation (iste.geometry) vs OpenDrift's WGS84-ellipsoidal geodesic forward calculation"
+  },
+  "known_limitations": [
+    "Hotspot alert logic uses a user-directed 30% minimum-fraction-of-active-particles rule (per zone), requested and applied after the original F00-F07 pilot completed -- this is a deliberate, documented deviation from README section 10's originally locked 'any single particle triggers the zone' rule (CLAUDE.md section 13 requires such deviations be documented, not silent; see progress.md's post-F07 revision entry). Both fractions are configurable via fwd.hotspots.HotspotThresholds.",
+    "Spherical-Earth displacement approximation (iste.geometry.metres_to_degrees) vs OpenDrift's WGS84-ellipsoidal pyproj.Geod -- identified as the primary source of the small (<1%) OpenOil comparison residual; not fixed, per this project's reuse-Stage-III policy.",
+    "This specific case's real 72h run never triggers NEIGHBOR_FALLBACK or LAND_STRANDED (the slick stays over 60 km offshore throughout) -- those code paths were validated separately against synthetic/boundary points in F01-F03, not exercised end-to-end here.",
+    "Land classification source is the static CMEMS uo/vo NaN mask (~4.6 km grid resolution), not an independent coastline shapefile (none exists in this project's environment).",
+    "No frontend/application exists anywhere in this workspace to consume these outputs (confirmed by a dedicated search in F05); outputs are standalone files for now.",
+    "CLAUDE.md/README's documented forcing paths (data/ocean.nc, files/28th_june/wind.nc) still do not match the actual paths used throughout F01-F07 (data/28th_april/ocean.nc, data/28th_april/wind.nc) -- flagged since F00, docs not yet updated."
+  ]
+}

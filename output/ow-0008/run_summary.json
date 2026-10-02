@@ -1,0 +1,132 @@
+{
+  "case_id": "ow-0008",
+  "generated_at_utc": "2026-09-25T09:27:20+00:00",
+  "experiment": {
+    "start_time_utc": "2019-06-14T20:35:58",
+    "end_time_utc": "2019-06-17T20:35:58",
+    "duration_hours": 72,
+    "timestep_hours": 1,
+    "recorded_states": 73,
+    "initial_parcel_count": 548
+  },
+  "forcing": {
+    "ocean": {
+      "source": "CMEMS",
+      "file": "data/14th_june/ocean.nc",
+      "variables": [
+        "uo",
+        "vo"
+      ]
+    },
+    "wind": {
+      "source": "ERA5",
+      "file": "data/14th_june/wind.nc",
+      "variables": [
+        "u10",
+        "v10"
+      ],
+      "note": "time coordinate is 'valid_time' in this file, not 'time' as in ow-0009's wind.nc -- auto-detected by fwd.forcing._detect_wind_time_dim"
+    }
+  },
+  "physics": {
+    "formula": "u_oil = current_drift_factor*uo + wind_drift_factor*u10; v_oil = current_drift_factor*vo + wind_drift_factor*v10",
+    "current_drift_factor": 1.0,
+    "wind_drift_factor": 0.03,
+    "stokes_drift": false,
+    "weathering": false,
+    "advection_scheme": "euler"
+  },
+  "nan_coastline_policy": {
+    "modes": [
+      "DIRECT",
+      "NEIGHBOR_FALLBACK",
+      "INVALID_ENVIRONMENT",
+      "LAND_STRANDED",
+      "ALREADY_STRANDED"
+    ],
+    "fallback": "3x3 then 5x5 inverse-distance-weighted valid-ocean neighbors, minimum 4 valid neighbors, weight=1/(d^2+epsilon)",
+    "land_source": "static CMEMS uo/vo NaN mask"
+  },
+  "hotspots": {
+    "geojson": "regional_alert_geofences_wide.geojson",
+    "hotspot_count": 11,
+    "watch_km": 100,
+    "critical_km": 40,
+    "min_fraction_critical": 0.3,
+    "min_fraction_watch": 0.3,
+    "triggered_hotspots": [
+      "Beirut Port",
+      "Palm Islands Nature Reserve"
+    ],
+    "critical_hotspots": [
+      "Beirut Port"
+    ],
+    "per_hotspot": {
+      "Beirut Port": {
+        "min_distance_km": 20.01,
+        "first_watch_time_utc": "2019-06-14T20:35:58",
+        "first_critical_time_utc": "2019-06-14T20:35:58",
+        "final_status": "CRITICAL"
+      },
+      "Palm Islands Nature Reserve": {
+        "min_distance_km": 51.726,
+        "first_watch_time_utc": "2019-06-14T20:35:58",
+        "first_critical_time_utc": null,
+        "final_status": "WATCH"
+      }
+    }
+  },
+  "outputs": {
+    "trajectory": "output/ow-0008/trajectory.parquet",
+    "hourly_diagnostics": "output/ow-0008/hourly_diagnostics.parquet",
+    "hotspot_alerts": "output/ow-0008/hotspot_alerts.parquet",
+    "animation_mp4": "output/ow-0008/ow0008_forward_animation.mp4",
+    "representative_frames": [
+      "output/ow-0008/frames/critical_beirut_port.png",
+      "output/ow-0008/frames/final.png",
+      "output/ow-0008/frames/initial.png",
+      "output/ow-0008/frames/watch_palm_islands_nature_reserve.png"
+    ],
+    "openoil_reference": "output/ow-0008/openoil_reference.parquet",
+    "openoil_comparison": "output/ow-0008/openoil_comparison.parquet"
+  },
+  "final_state": {
+    "active_count": 548,
+    "stranded_count": 0
+  },
+  "openoil_validation": {
+    "checkpoints_hours": [
+      1,
+      6,
+      12,
+      24,
+      48,
+      72
+    ],
+    "mean_error_km": [
+      0.0014,
+      0.0071,
+      0.0078,
+      0.0158,
+      0.0267,
+      0.0412
+    ],
+    "max_error_km": [
+      0.0019,
+      0.0076,
+      0.0087,
+      0.017,
+      0.0283,
+      0.0485
+    ],
+    "n_excluded_nonfinite_total": 0
+  },
+  "known_limitations": [
+    "Hotspot alert logic uses a >=30% minimum-fraction-of-active-particles rule (per zone), the same user-directed rule now in effect for ow-0009 (see progress.md's post-F07 revision 3) -- a deliberate, documented deviation from README section 10's originally locked 'any single particle triggers the zone' rule.",
+    "This case starts only ~29 km from the nearest CMEMS-masked land cell (vs ~77 km for ow-0009) and Beirut Port is CRITICAL from t0 through the final hour -- a genuinely different regime from ow-0009's always-offshore case.",
+    "Spherical-Earth displacement approximation (iste.geometry.metres_to_degrees) vs OpenDrift's WGS84-ellipsoidal pyproj.Geod remains a known source of small residual error in the OpenOil comparison (see the printed investigation and progress.md).",
+    "ERA5 wind file for this case uses 'valid_time' as its time coordinate name (not 'time' as in ow-0009's file) -- handled by auto-detection in fwd.forcing, not a hard-coded fix.",
+    "Land classification source is the static CMEMS uo/vo NaN mask, not an independent coastline shapefile (none exists in this project's environment); OpenDrift's reference run uses its own real GSHHG coastline instead, a genuine methodological difference documented in this case's own comparison script/output.",
+    "No frontend/application exists anywhere in this workspace to consume these outputs; outputs are standalone files for now."
+  ]
+}
